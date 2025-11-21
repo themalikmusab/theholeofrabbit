@@ -4,6 +4,9 @@ import CombatSystem from './CombatSystem'
 import FactionSystem from './FactionSystem'
 import ShipSystem from './ShipSystem'
 import TradingSystem from './TradingSystem'
+import NarrativeGenerator from './NarrativeGenerator'
+import AchievementSystem from './AchievementSystem'
+import AwayMissionSystem from './AwayMissionSystem'
 
 /**
  * GameState - Manages all game data and state
@@ -42,6 +45,19 @@ export default class GameState {
     this.factionSystem = new FactionSystem(this)
     this.tradingSystem = new TradingSystem(this)
     this.combatSystem = new CombatSystem(this, this.crewSystem)
+    this.narrativeGenerator = new NarrativeGenerator(this)
+    this.achievementSystem = new AchievementSystem(this)
+    this.awayMissionSystem = new AwayMissionSystem(this)
+
+    // Achievement tracking data
+    this.achievementData = {
+      combatWins: 0,
+      trades: 0,
+      highMoraleTurns: 0,
+      survivedLowFuel: false,
+      foundArtifact: false,
+      anomaliesFound: 0
+    }
 
     // Legacy characters (kept for backwards compatibility with old events)
     this.characters = {
@@ -234,7 +250,11 @@ export default class GameState {
       crewSystem: this.crewSystem.serialize(),
       shipSystem: this.shipSystem.serialize(),
       factionSystem: this.factionSystem.serialize(),
-      tradingSystem: this.tradingSystem.serialize()
+      tradingSystem: this.tradingSystem.serialize(),
+      narrativeGenerator: this.narrativeGenerator.serialize(),
+      achievementSystem: this.achievementSystem.serialize(),
+      awayMissionSystem: this.awayMissionSystem.serialize(),
+      achievementData: { ...this.achievementData }
     }
   }
 
@@ -255,12 +275,23 @@ export default class GameState {
     this.gameOver = data.gameOver || false
     this.victory = data.victory || false
     this.endingType = data.endingType || null
+    this.achievementData = data.achievementData || {
+      combatWins: 0,
+      trades: 0,
+      highMoraleTurns: 0,
+      survivedLowFuel: false,
+      foundArtifact: false,
+      anomaliesFound: 0
+    }
 
     // Deserialize AAA systems
     if (data.crewSystem) this.crewSystem.deserialize(data.crewSystem)
     if (data.shipSystem) this.shipSystem.deserialize(data.shipSystem)
     if (data.factionSystem) this.factionSystem.deserialize(data.factionSystem)
     if (data.tradingSystem) this.tradingSystem.deserialize(data.tradingSystem)
+    if (data.narrativeGenerator) this.narrativeGenerator.deserialize(data.narrativeGenerator)
+    if (data.achievementSystem) this.achievementSystem.deserialize(data.achievementSystem)
+    if (data.awayMissionSystem) this.awayMissionSystem.deserialize(data.awayMissionSystem)
   }
 
   /**

@@ -50,7 +50,11 @@ export default class MenuScene extends Phaser.Scene {
       this.loadGame()
     })
 
-    this.createButton(width / 2, buttonY + 140, 'SETTINGS', () => {
+    this.createButton(width / 2, buttonY + 140, '📖 INTERACTIVE TUTORIAL', () => {
+      this.startTutorial()
+    })
+
+    this.createButton(width / 2, buttonY + 210, 'SETTINGS', () => {
       console.log('Settings - Not yet implemented')
       this.showMessage('Settings menu coming soon!')
     })
@@ -137,6 +141,27 @@ export default class MenuScene extends Phaser.Scene {
     } else {
       this.showMessage('Failed to load save!')
     }
+  }
+
+  startTutorial() {
+    console.log('=== Starting Interactive Tutorial ===')
+
+    // Initialize game state for tutorial
+    const gameState = new GameState()
+
+    // Start tutorial system
+    gameState.tutorialSystem.start()
+
+    // Initialize audio system
+    if (gameState.audioSystem) {
+      gameState.audioSystem.init()
+    }
+
+    // Launch tutorial scene
+    this.scene.start('TutorialScene', {
+      gameState,
+      returnToMenu: true
+    })
   }
 
   createStarfield() {

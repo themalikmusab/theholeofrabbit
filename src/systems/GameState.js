@@ -7,6 +7,8 @@ import TradingSystem from './TradingSystem'
 import NarrativeGenerator from './NarrativeGenerator'
 import AchievementSystem from './AchievementSystem'
 import AwayMissionSystem from './AwayMissionSystem'
+import TutorialSystem from './TutorialSystem'
+import AudioSystem from './AudioSystem'
 
 /**
  * GameState - Manages all game data and state
@@ -48,6 +50,8 @@ export default class GameState {
     this.narrativeGenerator = new NarrativeGenerator(this)
     this.achievementSystem = new AchievementSystem(this)
     this.awayMissionSystem = new AwayMissionSystem(this)
+    this.tutorialSystem = new TutorialSystem(this)
+    this.audioSystem = new AudioSystem(null) // Will be initialized by scenes
 
     // Achievement tracking data
     this.achievementData = {
@@ -254,6 +258,7 @@ export default class GameState {
       narrativeGenerator: this.narrativeGenerator.serialize(),
       achievementSystem: this.achievementSystem.serialize(),
       awayMissionSystem: this.awayMissionSystem.serialize(),
+      tutorialSystem: this.tutorialSystem.serialize(),
       achievementData: { ...this.achievementData }
     }
   }
@@ -292,6 +297,7 @@ export default class GameState {
     if (data.narrativeGenerator) this.narrativeGenerator.deserialize(data.narrativeGenerator)
     if (data.achievementSystem) this.achievementSystem.deserialize(data.achievementSystem)
     if (data.awayMissionSystem) this.awayMissionSystem.deserialize(data.awayMissionSystem)
+    if (data.tutorialSystem) this.tutorialSystem.deserialize(data.tutorialSystem)
   }
 
   /**

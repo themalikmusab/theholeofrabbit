@@ -2,6 +2,8 @@
  * EventSystem - Manages game events, choices, and outcomes
  */
 
+import eventsData from '../data/events.json'
+
 export default class EventSystem {
   constructor(gameState) {
     this.gameState = gameState
@@ -10,15 +12,11 @@ export default class EventSystem {
   }
 
   /**
-   * Load events from JSON file
+   * Load events from imported JSON data
    */
   async loadEvents() {
     try {
-      const response = await fetch('/src/data/events.json')
-      if (!response.ok) {
-        throw new Error(`Failed to load events: ${response.status}`)
-      }
-      this.events = await response.json()
+      this.events = eventsData
       console.log(`Loaded ${this.events.length} events`)
       return true
     } catch (error) {

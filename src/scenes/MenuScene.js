@@ -1,5 +1,8 @@
 import Phaser from 'phaser'
 import { COLORS } from '../config'
+import GameState from '../systems/GameState'
+import EventSystem from '../systems/EventSystem'
+import SaveSystem from '../systems/SaveSystem'
 
 export default class MenuScene extends Phaser.Scene {
   constructor() {
@@ -40,13 +43,11 @@ export default class MenuScene extends Phaser.Scene {
     const buttonY = height / 2 + 80
 
     this.createButton(width / 2, buttonY, 'NEW GAME', () => {
-      console.log('Starting new game')
-      this.scene.start('MapScene')
+      this.startNewGame()
     })
 
     this.createButton(width / 2, buttonY + 70, 'LOAD GAME', () => {
-      console.log('Load game - Not yet implemented')
-      this.showMessage('Save/Load system coming soon!')
+      this.loadGame()
     })
 
     this.createButton(width / 2, buttonY + 140, 'SETTINGS', () => {
@@ -55,7 +56,7 @@ export default class MenuScene extends Phaser.Scene {
     })
 
     // Version info
-    this.add.text(20, height - 30, 'v1.0.0-alpha | Phase 1', {
+    this.add.text(20, height - 30, 'v1.0.0-alpha | Phase 2', {
       font: '12px monospace',
       fill: '#666666'
     })
@@ -65,6 +66,68 @@ export default class MenuScene extends Phaser.Scene {
       font: '12px monospace',
       fill: '#666666'
     }).setOrigin(1, 0)
+  }
+
+  async startNewGame() {
+    console.log('Starting new game...')
+
+    // Initialize game state
+    const gameState = new GameState()
+
+    // Initialize event system
+    const eventSystem = new EventSystem(gameState)
+
+    // Load events
+    const loaded = await eventSystem.loadEvents()
+    if (!loaded) {
+      console.error('Failed to load events!')
+      this.showMessage('Error loading game data!', COLORS.DANGER)
+      return
+    }
+
+    console.log(`Game initialized with ${eventSystem.events.length} events`)
+
+    // Show intro event
+    const introEvent = eventSystem.getEvent('intro_departure')
+    if (introEvent) {
+      this.scene.start('EventScene', {
+        gameState,
+        eventSystem,
+        event: introEvent
+      })
+    } else {
+      // No intro, go straight to map
+      this.scene.start('MapScene', {
+        gameState,
+        eventSystem
+      })
+    }
+  }
+
+  loadGame() {
+    const saves = SaveSystem.getSaves()
+
+    if (saves.length === 0) {
+      this.showMessage('No saved games found!')
+      return
+    }
+
+    // For now, just load slot 1
+    const savedState = SaveSystem.load(1)
+    if (savedState) {
+      const gameState = new GameState()
+      gameState.deserialize(savedState)
+
+      const eventSystem = new EventSystem(gameState)
+      eventSystem.loadEvents().then(() => {
+        this.scene.start('MapScene', {
+          gameState,
+          eventSystem
+        })
+      })
+    } else {
+      this.showMessage('Failed to load save!')
+    }
   }
 
   createStarfield() {

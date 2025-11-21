@@ -301,17 +301,77 @@ export default class MapScene extends Phaser.Scene {
       }
     }
 
-    // No event, show arrival message
-    this.showMessage(`Arrived at ${system.name}`, COLORS.SUCCESS)
+    // No event - give resources based on system type
+    let resourceGain = this.giveSystemResources(system)
+
+    if (resourceGain) {
+      this.showMessage(`Arrived at ${system.name}\n${resourceGain}`, COLORS.SUCCESS)
+    } else {
+      this.showMessage(`Arrived at ${system.name}`, COLORS.SUCCESS)
+    }
 
     // Check for victory
     if (system.id === 'new_earth' || system.type === 'haven') {
       this.gameState.triggerVictory('new_home_found')
       this.scene.start('EndingScene', { gameState: this.gameState })
+      return
+    }
+
+    // Check for game over (out of fuel/food)
+    if (this.gameState.checkGameOver()) {
+      this.scene.start('EndingScene', { gameState: this.gameState })
+      return
     }
 
     // Refresh scene
     this.scene.restart({ gameState: this.gameState, eventSystem: this.eventSystem })
+  }
+
+  giveSystemResources(system) {
+    // Give resources based on system type
+    let message = ''
+
+    switch (system.type) {
+      case 'resource':
+        this.gameState.modifyResource('materials', 30)
+        this.gameState.modifyResource('fuel', 15)
+        message = '+30 Materials, +15 Fuel'
+        break
+
+      case 'barren':
+        this.gameState.modifyResource('fuel', 5)
+        message = '+5 Fuel (emergency reserves found)'
+        break
+
+      case 'habitable':
+        this.gameState.modifyResource('food', 20)
+        this.gameState.modifyResource('morale', 10)
+        message = '+20 Food, +10 Morale'
+        break
+
+      case 'ruins':
+        this.gameState.modifyResource('technology', 10)
+        message = '+10 Technology'
+        break
+
+      case 'inhabited':
+        // Handled by events, no auto-resources
+        break
+
+      case 'hostile':
+        // Dangerous, no resources
+        break
+
+      case 'anomaly':
+        // Handled by events
+        break
+    }
+
+    if (message) {
+      this.resourceDisplay.update()
+    }
+
+    return message
   }
 
   showMessage(text, color = COLORS.WARNING) {

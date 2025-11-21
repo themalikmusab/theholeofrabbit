@@ -1,0 +1,628 @@
+[
+  {
+    "id": "intro_departure",
+    "title": "Departure from Earth",
+    "description": "Earth fades to a blue marble in the viewport. Ten thousand souls aboard the generation ship 'Ark Humanity' look to you, Captain, for guidance. The journey to find a new home among the stars begins now. How will you address the crew?",
+    "context": "story",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Give a hopeful speech about humanity's future",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 15 }
+            ],
+            "text": "Your words inspire courage and hope. The crew stands a little taller, ready to face the unknown. Morale increases significantly."
+          }
+        ],
+        "flags": ["leadership_inspirational"]
+      },
+      {
+        "text": "Be realistic about the dangers ahead",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": -5 },
+              { "type": "character", "character": "chen", "value": 10 }
+            ],
+            "text": "The crew appreciates your honesty. Dr. Chen nods in approval of your pragmatism, though anxiety spreads through the ship."
+          }
+        ],
+        "flags": ["leadership_pragmatic"]
+      },
+      {
+        "text": "Say nothing, let actions speak louder than words",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "character", "character": "mitchell", "value": 15 }
+            ],
+            "text": "Commander Mitchell respects your stoic approach. 'Deeds, not words,' she says approvingly."
+          }
+        ],
+        "flags": ["leadership_stoic"]
+      }
+    ]
+  },
+  {
+    "id": "derelict_ship",
+    "title": "Derelict Vessel",
+    "description": "Sensors detect a massive ship drifting in the void. No life signs. The hull bears markings from the First Wave colony missions - lost decades ago. Its cargo holds might contain valuable supplies... or dangers.",
+    "context": "travel",
+    "weight": 3,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Send a salvage team to investigate",
+        "requirements": [
+          { "resource": "population", "operator": ">=", "value": 10 }
+        ],
+        "outcomes": [
+          {
+            "chance": 0.5,
+            "effects": [
+              { "type": "materials", "value": 50 },
+              { "type": "fuel", "value": 20 }
+            ],
+            "text": "Your team returns with valuable materials and fuel cells! The ship was carrying supplies meant for a colony that never received them."
+          },
+          {
+            "chance": 0.3,
+            "effects": [
+              { "type": "technology", "value": 15 }
+            ],
+            "text": "They find intact data cores containing lost technology from the First Wave! Dr. Okafor is ecstatic about the research possibilities."
+          },
+          {
+            "chance": 0.2,
+            "effects": [
+              { "type": "population", "value": -5 },
+              { "type": "morale", "value": -15 }
+            ],
+            "text": "The ship's AI defense systems activate. You lose crew members in the attack. The survivors barely make it back."
+          }
+        ],
+        "flags": ["salvaged_derelict"]
+      },
+      {
+        "text": "Scan from a safe distance",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "technology", "value": 5 }
+            ],
+            "text": "Your sensors gather valuable data about the ship's design. Engineer Rodriguez makes notes for potential improvements to your own systems."
+          }
+        ]
+      },
+      {
+        "text": "Continue on - it's a tomb, not a treasure",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 5 }
+            ],
+            "text": "You log the coordinates and move on. The crew appreciates not risking lives for salvage. Sometimes the wisest choice is to keep moving forward."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "food_shortage",
+    "title": "Food Crisis",
+    "description": "Hydroponics reports a critical failure. A fungal blight has destroyed 30% of the crop reserves. Councilor Park warns that panic is spreading. You must act quickly to prevent starvation.",
+    "context": "crisis",
+    "weight": 2,
+    "repeatable": true,
+    "choices": [
+      {
+        "text": "Implement strict rationing immediately",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "food", "value": 20 },
+              { "type": "morale", "value": -20 },
+              { "type": "character", "character": "park", "value": -10 }
+            ],
+            "text": "Rationing extends food supplies but the crew goes hungry. Fights break out in the mess hall. Councilor Park says you're turning the ship into a prison."
+          }
+        ],
+        "flags": ["rationing_implemented"]
+      },
+      {
+        "text": "Divert energy from engines to expand hydroponics",
+        "requirements": [
+          { "resource": "fuel", "operator": ">=", "value": 30 }
+        ],
+        "outcomes": [
+          {
+            "chance": 0.7,
+            "effects": [
+              { "type": "fuel", "value": -30 },
+              { "type": "food", "value": 40 }
+            ],
+            "text": "The emergency expansion works! New growing bays come online and food production stabilizes. Travel will be slower, but no one will starve."
+          },
+          {
+            "chance": 0.3,
+            "effects": [
+              { "type": "fuel", "value": -30 },
+              { "type": "food", "value": 10 }
+            ],
+            "text": "The expansion helps but doesn't fully solve the problem. You've burned precious fuel and still face shortages."
+          }
+        ]
+      },
+      {
+        "text": "Search for an asteroid field to mine for minerals",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "fuel", "value": -15 }
+            ],
+            "text": "You set course for a nearby asteroid field. This will delay your journey but might provide resources to rebuild the hydroponics systems.",
+            "unlocks": ["asteroid_mining"]
+          }
+        ],
+        "flags": ["seeking_resources"]
+      }
+    ]
+  },
+  {
+    "id": "alien_signal",
+    "title": "Unknown Signal",
+    "description": "Your comm officer picks up a repeating signal. It's not human, but it's clearly artificial. The pattern suggests intelligence. Dr. Okafor wants to investigate. Commander Mitchell warns it could be a trap.",
+    "context": "travel",
+    "weight": 4,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Respond to the signal with a greeting",
+        "outcomes": [
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "character", "character": "okafor", "value": 20 }
+            ],
+            "text": "The signal changes! It's attempting communication. Dr. Okafor begins the painstaking work of translation. This could be humanity's first contact.",
+            "unlocks": ["first_contact_friendly"]
+          },
+          {
+            "chance": 0.4,
+            "effects": [
+              { "type": "morale", "value": -10 }
+            ],
+            "text": "Silence. The signal stops entirely. Was it a warning beacon? Or did your response frighten them away?"
+          }
+        ],
+        "flags": ["contacted_aliens"]
+      },
+      {
+        "text": "Track the signal but maintain radio silence",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "fuel", "value": -10 },
+              { "type": "character", "character": "mitchell", "value": 10 }
+            ],
+            "text": "You follow the signal to its source while remaining undetected. Commander Mitchell approves of your caution. You gain valuable intelligence.",
+            "unlocks": ["alien_observation"]
+          }
+        ],
+        "flags": ["tracked_signal"]
+      },
+      {
+        "text": "Ignore it and alter course away from the signal",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "fuel", "value": -5 },
+              { "type": "character", "character": "okafor", "value": -20 }
+            ],
+            "text": "You change course. Dr. Okafor protests vehemently. 'We may have just passed up humanity's greatest discovery!' The signal fades behind you."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mutiny_threat",
+    "title": "Whispers of Mutiny",
+    "description": "Commander Mitchell reports troubling news. A group of colonists, led by a charismatic engineer named Torres, are questioning your leadership. They want to turn back, to try finding a closer colony site. The situation is volatile.",
+    "context": "crisis",
+    "weight": 2,
+    "repeatable": false,
+    "prerequisiteFlags": ["leadership_pragmatic"],
+    "choices": [
+      {
+        "text": "Address the crew directly, explain your reasoning",
+        "outcomes": [
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "morale", "value": 10 },
+              { "type": "character", "character": "park", "value": 15 }
+            ],
+            "text": "Your transparency wins over most of the dissidents. Torres still disagrees, but without broad support, backs down. Councilor Park praises your diplomacy."
+          },
+          {
+            "chance": 0.4,
+            "effects": [
+              { "type": "morale", "value": -15 }
+            ],
+            "text": "Your speech is met with skepticism. Torres argues persuasively against you. The crew is more divided than ever."
+          }
+        ]
+      },
+      {
+        "text": "Have Mitchell arrest the ringleaders",
+        "requirements": [
+          { "resource": "population", "operator": ">=", "value": 950 }
+        ],
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "population", "value": -10 },
+              { "type": "morale", "value": -25 },
+              { "type": "character", "character": "mitchell", "value": 20 },
+              { "type": "character", "character": "park", "value": -30 }
+            ],
+            "text": "Mitchell's security team moves swiftly. Torres and the ringleaders are confined. The mutiny is crushed, but at great cost. The crew fears you now. Councilor Park is horrified."
+          }
+        ],
+        "flags": ["crushed_dissent"]
+      },
+      {
+        "text": "Offer a compromise - put destination to a vote",
+        "outcomes": [
+          {
+            "chance": 0.7,
+            "effects": [
+              { "type": "morale", "value": 15 },
+              { "type": "character", "character": "park", "value": 25 }
+            ],
+            "text": "Democracy prevails. The vote goes in your favor, but more importantly, the crew feels heard. Torres accepts the result. Unity is restored."
+          },
+          {
+            "chance": 0.3,
+            "effects": [
+              { "type": "morale", "value": -10 }
+            ],
+            "text": "The vote is close and contentious. While you maintain command, the ship remains deeply divided about the path forward.",
+            "unlocks": ["divided_crew"]
+          }
+        ],
+        "flags": ["democratic_leadership"]
+      }
+    ]
+  },
+  {
+    "id": "ancient_artifact",
+    "title": "The Obelisk",
+    "description": "On a barren moon, your away team discovers something impossible - a massive black obelisk, perfectly smooth, covered in unknown symbols. It predates humanity by millions of years. Dr. Okafor believes it might be a map or a warning. What do you do?",
+    "context": "system",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Study it thoroughly, document everything",
+        "outcomes": [
+          {
+            "chance": 0.5,
+            "effects": [
+              { "type": "technology", "value": 30 },
+              { "type": "fuel", "value": -20 }
+            ],
+            "text": "Weeks of research pay off. Dr. Okafor cracks the basic language structure. The obelisk contains star charts to habitable worlds! But the delay has cost you fuel."
+          },
+          {
+            "chance": 0.3,
+            "effects": [
+              { "type": "technology", "value": 10 },
+              { "type": "morale", "value": 10 }
+            ],
+            "text": "You learn much from the artifact, though its deepest secrets remain locked. Still, the crew is inspired by this proof that we're not alone in the universe."
+          },
+          {
+            "chance": 0.2,
+            "effects": [
+              { "type": "fuel", "value": -20 },
+              { "type": "morale", "value": -10 }
+            ],
+            "text": "After weeks of study, the obelisk remains inscrutable. Your scientists are frustrated, fuel is wasted, and you're no closer to understanding its purpose."
+          }
+        ],
+        "flags": ["studied_obelisk"]
+      },
+      {
+        "text": "Take a piece of it for research on the ship",
+        "outcomes": [
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "technology", "value": 15 }
+            ],
+            "text": "A sample is carefully extracted and brought aboard. Your research lab can study it during the voyage without burning fuel staying here."
+          },
+          {
+            "chance": 0.4,
+            "effects": [
+              { "type": "morale", "value": -15 },
+              { "type": "population", "value": -3 }
+            ],
+            "text": "The moment you cut into the obelisk, it releases a burst of energy. Three crew members die instantly. The rest of the structure crumbles to dust. What have you done?"
+          }
+        ]
+      },
+      {
+        "text": "Leave it undisturbed - some mysteries should remain",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 5 }
+            ],
+            "text": "You log the coordinates and leave the obelisk as you found it. Perhaps one day, humanity will return with better understanding. For now, respect seems wisest."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "medical_emergency",
+    "title": "Outbreak",
+    "description": "Dr. Chen reports a serious problem - a mysterious illness is spreading through the crew. It's not lethal, but it's debilitating. With limited medical supplies, you must make difficult choices.",
+    "context": "crisis",
+    "weight": 3,
+    "repeatable": true,
+    "choices": [
+      {
+        "text": "Quarantine the sick, focus resources on the healthy",
+        "outcomes": [
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "population", "value": -15 },
+              { "type": "morale", "value": -20 },
+              { "type": "character", "character": "chen", "value": -25 }
+            ],
+            "text": "The quarantine prevents spread but many die without treatment. Dr. Chen is disgusted by your triage decision. 'We're supposed to save everyone,' he says bitterly."
+          },
+          {
+            "chance": 0.4,
+            "effects": [
+              { "type": "population", "value": -8 },
+              { "type": "morale", "value": -10 }
+            ],
+            "text": "The quarantine mostly works, though some still die. It's brutal pragmatism, but it might have saved the ship."
+          }
+        ]
+      },
+      {
+        "text": "Use all medical supplies to treat everyone",
+        "requirements": [
+          { "resource": "materials", "operator": ">=", "value": 30 }
+        ],
+        "outcomes": [
+          {
+            "chance": 0.7,
+            "effects": [
+              { "type": "materials", "value": -30 },
+              { "type": "morale", "value": 15 },
+              { "type": "character", "character": "chen", "value": 20 }
+            ],
+            "text": "Dr. Chen's team works around the clock. The supplies are exhausted but the outbreak is contained. Everyone survives. The crew's faith in you strengthens."
+          },
+          {
+            "chance": 0.3,
+            "effects": [
+              { "type": "materials", "value": -30 },
+              { "type": "population", "value": -5 },
+              { "type": "morale", "value": 5 }
+            ],
+            "text": "Despite using all resources, some still die. But the crew knows you tried everything. That counts for something."
+          }
+        ]
+      },
+      {
+        "text": "Search for a planet with medicinal plants",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "fuel", "value": -15 }
+            ],
+            "text": "You alter course toward a world with potential biological resources. It's a gamble - you'll lose time and fuel, but might find a cure.",
+            "unlocks": ["medicinal_planet_search"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "star_choice",
+    "title": "Two Paths Diverge",
+    "description": "Your navigation team has identified two possible routes. The blue star route is faster but passes through unexplored space. The red star route is longer but follows mapped territory. Both have risks.",
+    "context": "travel",
+    "weight": 2,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Take the blue star route - speed is essential",
+        "outcomes": [
+          {
+            "chance": 0.5,
+            "effects": [
+              { "type": "fuel", "value": -15 }
+            ],
+            "text": "The route proves faster than expected. You've saved time and fuel. Sometimes fortune favors the bold.",
+            "unlocks": ["blue_route_discovery"]
+          },
+          {
+            "chance": 0.5,
+            "effects": [
+              { "type": "fuel", "value": -35 },
+              { "type": "morale", "value": -10 }
+            ],
+            "text": "The route is riddled with navigation hazards. You burn extra fuel dodging asteroid fields and radiation zones. The crew questions your judgment.",
+            "unlocks": ["blue_route_hazards"]
+          }
+        ],
+        "flags": ["chose_blue_route"]
+      },
+      {
+        "text": "Take the red star route - safety first",
+        "outcomes": [
+          {
+            "chance": 0.7,
+            "effects": [
+              { "type": "fuel", "value": -25 },
+              { "type": "morale", "value": 5 }
+            ],
+            "text": "The journey is longer but uneventful. The crew appreciates your cautious approach, even if it costs extra fuel."
+          },
+          {
+            "chance": 0.3,
+            "effects": [
+              { "type": "fuel", "value": -25 }
+            ],
+            "text": "The mapped route proves as reliable as expected. No surprises, but the longer journey is mentally taxing.",
+            "unlocks": ["red_route_encounters"]
+          }
+        ],
+        "flags": ["chose_red_route"]
+      }
+    ]
+  },
+  {
+    "id": "distress_call",
+    "title": "Distress Signal",
+    "description": "You receive a faint distress call from a small human escape pod. They claim to be survivors from a failed colony attempt. They're running out of oxygen. But something about the signal feels off...",
+    "context": "travel",
+    "weight": 2,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Rescue them immediately",
+        "outcomes": [
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "population", "value": 12 },
+              { "type": "morale", "value": 20 },
+              { "type": "food", "value": -15 }
+            ],
+            "text": "You rescue twelve grateful survivors. They're malnourished but alive. Their stories of survival inspire your crew, though feeding them will strain supplies."
+          },
+          {
+            "chance": 0.3,
+            "effects": [
+              { "type": "population", "value": 8 },
+              { "type": "materials", "value": -20 },
+              { "type": "morale", "value": 10 }
+            ],
+            "text": "Eight survivors come aboard. One is a skilled engineer who immediately helps repair systems. The rescue cost resources but gained expertise."
+          },
+          {
+            "chance": 0.1,
+            "effects": [
+              { "type": "population", "value": -25 },
+              { "type": "materials", "value": -40 },
+              { "type": "morale", "value": -30 }
+            ],
+            "text": "It was a trap. Pirates were using the pod as bait. They board your ship, taking supplies and hostages before you can repel them. The crew is shaken."
+          }
+        ],
+        "flags": ["rescued_survivors"]
+      },
+      {
+        "text": "Send a probe to investigate first",
+        "requirements": [
+          { "resource": "technology", "operator": ">=", "value": 10 }
+        ],
+        "outcomes": [
+          {
+            "chance": 0.8,
+            "effects": [
+              { "type": "technology", "value": -5 },
+              { "type": "population", "value": 12 },
+              { "type": "food", "value": -15 }
+            ],
+            "text": "The probe confirms they're legitimate survivors. You rescue them safely. Your caution was wise."
+          },
+          {
+            "chance": 0.2,
+            "effects": [
+              { "type": "technology", "value": -5 }
+            ],
+            "text": "The probe reveals it's a pirate trap. You alter course, avoiding the ambush entirely. The probe cost resources but saved lives."
+          }
+        ]
+      },
+      {
+        "text": "Ignore the signal - you can't risk your ship",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": -15 },
+              { "type": "character", "character": "chen", "value": -20 },
+              { "type": "character", "character": "mitchell", "value": 10 }
+            ],
+            "text": "You press on. Dr. Chen argues passionately against your decision, but Commander Mitchell supports it. 'We have our own people to protect,' she says. The crew is divided."
+          }
+        ],
+        "flags": ["ignored_distress"]
+      }
+    ]
+  },
+  {
+    "id": "beautiful_nebula",
+    "title": "The Azure Nebula",
+    "description": "You enter a breathtakingly beautiful nebula. Swirls of azure and violet gas create patterns like celestial art. The crew gathers at viewports, some in tears. For a moment, the hardships fade. This is why humanity reaches for the stars.",
+    "context": "travel",
+    "weight": 3,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Take time to let the crew enjoy this moment",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 25 },
+              { "type": "fuel", "value": -10 }
+            ],
+            "text": "You slow the ship and give everyone time to appreciate the wonder. Poets write verses, artists sketch, families hold each other. The fuel cost is worth it. Morale soars."
+          }
+        ],
+        "flags": ["enjoyed_nebula"]
+      },
+      {
+        "text": "Continue at normal speed - we have a mission",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 5 }
+            ],
+            "text": "The crew appreciates the sight as you pass through. It's a beautiful reminder of what you're fighting to preserve."
+          }
+        ]
+      }
+    ]
+  }
+]

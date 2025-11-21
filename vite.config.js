@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import path from 'path'
+import { copyFileSync } from 'fs'
 
 export default defineConfig({
   base: '/theholeofrabbit/',
@@ -9,6 +10,18 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: false
   },
+  plugins: [
+    {
+      name: 'copy-nojekyll',
+      closeBundle() {
+        try {
+          copyFileSync('.nojekyll', 'docs/.nojekyll')
+        } catch (e) {
+          console.log('Note: .nojekyll file not found, skipping copy')
+        }
+      }
+    }
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

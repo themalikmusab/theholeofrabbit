@@ -7,20 +7,28 @@ import eventsData from '../data/events.json'
 export default class EventSystem {
   constructor(gameState) {
     this.gameState = gameState
-    this.events = []
+    this.events = eventsData || [] // Load events immediately from import
     this.currentEvent = null
+    console.log(`EventSystem initialized with ${this.events.length} events`)
   }
 
   /**
-   * Load events from imported JSON data
+   * Load events - now just validates since events are loaded in constructor
    */
-  async loadEvents() {
+  loadEvents() {
     try {
-      this.events = eventsData
-      console.log(`Loaded ${this.events.length} events`)
+      console.log('EventSystem.loadEvents() called')
+      console.log('Events already loaded:', this.events.length)
+
+      if (!this.events || !Array.isArray(this.events) || this.events.length === 0) {
+        console.error('No events available!')
+        return false
+      }
+
+      console.log(`Successfully validated ${this.events.length} events`)
       return true
     } catch (error) {
-      console.error('Failed to load events:', error)
+      console.error('ERROR in loadEvents:', error)
       return false
     }
   }

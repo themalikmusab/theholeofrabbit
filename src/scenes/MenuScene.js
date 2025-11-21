@@ -68,39 +68,48 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(1, 0)
   }
 
-  async startNewGame() {
-    console.log('Starting new game...')
+  startNewGame() {
+    try {
+      console.log('=== Starting new game ===')
 
-    // Initialize game state
-    const gameState = new GameState()
+      // Initialize game state
+      const gameState = new GameState()
+      console.log('GameState created')
 
-    // Initialize event system
-    const eventSystem = new EventSystem(gameState)
+      // Initialize event system (events loaded in constructor)
+      const eventSystem = new EventSystem(gameState)
+      console.log('EventSystem created with', eventSystem.events.length, 'events')
 
-    // Load events
-    const loaded = await eventSystem.loadEvents()
-    if (!loaded) {
-      console.error('Failed to load events!')
-      this.showMessage('Error loading game data!', COLORS.DANGER)
-      return
-    }
+      // Validate events
+      const loaded = eventSystem.loadEvents()
+      if (!loaded || eventSystem.events.length === 0) {
+        console.error('Failed to load events!')
+        this.showMessage('Error loading game data!', COLORS.DANGER)
+        return
+      }
 
-    console.log(`Game initialized with ${eventSystem.events.length} events`)
+      console.log(`Game initialized successfully with ${eventSystem.events.length} events`)
 
-    // Show intro event
-    const introEvent = eventSystem.getEvent('intro_departure')
-    if (introEvent) {
-      this.scene.start('EventScene', {
-        gameState,
-        eventSystem,
-        event: introEvent
-      })
-    } else {
-      // No intro, go straight to map
-      this.scene.start('MapScene', {
-        gameState,
-        eventSystem
-      })
+      // Show intro event
+      const introEvent = eventSystem.getEvent('intro_departure')
+      if (introEvent) {
+        console.log('Starting intro event')
+        this.scene.start('EventScene', {
+          gameState,
+          eventSystem,
+          event: introEvent
+        })
+      } else {
+        console.log('No intro event found, going to map')
+        this.scene.start('MapScene', {
+          gameState,
+          eventSystem
+        })
+      }
+    } catch (error) {
+      console.error('ERROR in startNewGame:', error)
+      console.error('Stack:', error.stack)
+      this.showMessage('Game failed to start! Check console.', COLORS.DANGER)
     }
   }
 
@@ -119,11 +128,11 @@ export default class MenuScene extends Phaser.Scene {
       gameState.deserialize(savedState)
 
       const eventSystem = new EventSystem(gameState)
-      eventSystem.loadEvents().then(() => {
-        this.scene.start('MapScene', {
-          gameState,
-          eventSystem
-        })
+      eventSystem.loadEvents()
+
+      this.scene.start('MapScene', {
+        gameState,
+        eventSystem
       })
     } else {
       this.showMessage('Failed to load save!')

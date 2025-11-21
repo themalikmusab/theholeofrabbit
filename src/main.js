@@ -6,6 +6,8 @@ import MapScene from './scenes/MapScene'
 import EventScene from './scenes/EventScene'
 import ShipScene from './scenes/ShipScene'
 import EndingScene from './scenes/EndingScene'
+import CombatScene from './scenes/CombatScene'
+import TradingScene from './scenes/TradingScene'
 
 // Register all scenes
 GAME_CONFIG.scene = [
@@ -14,7 +16,9 @@ GAME_CONFIG.scene = [
   MapScene,
   EventScene,
   ShipScene,
-  EndingScene
+  EndingScene,
+  CombatScene,
+  TradingScene
 ]
 
 // Initialize game

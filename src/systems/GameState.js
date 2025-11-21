@@ -1,4 +1,9 @@
 import { RESOURCES, GAME_SETTINGS } from '../config'
+import CrewSystem from './CrewSystem'
+import CombatSystem from './CombatSystem'
+import FactionSystem from './FactionSystem'
+import ShipSystem from './ShipSystem'
+import TradingSystem from './TradingSystem'
 
 /**
  * GameState - Manages all game data and state
@@ -28,7 +33,17 @@ export default class GameState {
     this.turn = 0
     this.daysPassed = 0
 
-    // Characters and their opinions
+    // Special goods for trading
+    this.specialGoods = {}
+
+    // Initialize AAA systems
+    this.crewSystem = new CrewSystem(this)
+    this.shipSystem = new ShipSystem(this)
+    this.factionSystem = new FactionSystem(this)
+    this.tradingSystem = new TradingSystem(this)
+    this.combatSystem = new CombatSystem(this, this.crewSystem)
+
+    // Legacy characters (kept for backwards compatibility with old events)
     this.characters = {
       'elena': { name: 'Captain Elena Vasquez', opinion: 0, alive: true },
       'chen': { name: 'Dr. James Chen', opinion: 0, alive: true },
@@ -38,7 +53,7 @@ export default class GameState {
       'park': { name: 'Councilor David Park', opinion: 0, alive: true }
     }
 
-    // Ship modules
+    // Legacy ship (kept for backwards compatibility)
     this.ship = {
       modules: {
         lifeSupport: { level: 1, damaged: false },
@@ -165,6 +180,26 @@ export default class GameState {
       return true
     }
 
+    if (this.resources[RESOURCES.FUEL] <= 0) {
+      this.gameOver = true
+      this.endingType = 'stranded'
+      return true
+    }
+
+    // Check ship critical failure
+    if (this.shipSystem && this.shipSystem.criticalFailure) {
+      this.gameOver = true
+      this.endingType = 'ship_destroyed'
+      return true
+    }
+
+    // Check crew - need at least one living crew member
+    if (this.crewSystem && this.crewSystem.getLivingCrew().length === 0) {
+      this.gameOver = true
+      this.endingType = 'crew_lost'
+      return true
+    }
+
     return false
   }
 
@@ -189,11 +224,17 @@ export default class GameState {
       flags: [...this.flags],
       turn: this.turn,
       daysPassed: this.daysPassed,
+      specialGoods: { ...this.specialGoods },
       characters: JSON.parse(JSON.stringify(this.characters)),
       ship: JSON.parse(JSON.stringify(this.ship)),
       gameOver: this.gameOver,
       victory: this.victory,
-      endingType: this.endingType
+      endingType: this.endingType,
+      // Serialize all AAA systems
+      crewSystem: this.crewSystem.serialize(),
+      shipSystem: this.shipSystem.serialize(),
+      factionSystem: this.factionSystem.serialize(),
+      tradingSystem: this.tradingSystem.serialize()
     }
   }
 
@@ -208,11 +249,18 @@ export default class GameState {
     this.flags = [...data.flags]
     this.turn = data.turn
     this.daysPassed = data.daysPassed
+    this.specialGoods = data.specialGoods || {}
     this.characters = JSON.parse(JSON.stringify(data.characters))
     this.ship = JSON.parse(JSON.stringify(data.ship))
     this.gameOver = data.gameOver || false
     this.victory = data.victory || false
     this.endingType = data.endingType || null
+
+    // Deserialize AAA systems
+    if (data.crewSystem) this.crewSystem.deserialize(data.crewSystem)
+    if (data.shipSystem) this.shipSystem.deserialize(data.shipSystem)
+    if (data.factionSystem) this.factionSystem.deserialize(data.factionSystem)
+    if (data.tradingSystem) this.tradingSystem.deserialize(data.tradingSystem)
   }
 
   /**

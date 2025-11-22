@@ -80,17 +80,17 @@ export default class TutorialScene extends Phaser.Scene {
   }
 
   createTutorialPanel(width, height) {
-    // Main content panel
-    this.contentPanel = this.add.container(width / 2, height / 2)
+    // Main content panel - moved up slightly
+    this.contentPanel = this.add.container(width / 2, height / 2 - 20)
 
-    // Background
-    const panelBg = this.add.rectangle(0, 0, 900, 450, 0x000000, 0.85)
+    // Background - taller to fit all content
+    const panelBg = this.add.rectangle(0, 0, 900, 400, 0x000000, 0.85)
     panelBg.setStrokeStyle(3, COLORS.SUCCESS)
     this.contentPanel.add(panelBg)
 
     // Title area
-    this.stepTitle = this.add.text(0, -180, '', {
-      fontSize: '28px',
+    this.stepTitle = this.add.text(0, -170, '', {
+      fontSize: '26px',
       fontFamily: 'Arial',
       color: COLORS.SUCCESS,
       fontStyle: 'bold',
@@ -99,20 +99,20 @@ export default class TutorialScene extends Phaser.Scene {
     }).setOrigin(0.5)
     this.contentPanel.add(this.stepTitle)
 
-    // Description area with scroll
-    this.stepDescription = this.add.text(0, -50, '', {
-      fontSize: '16px',
+    // Description area - adjusted for better spacing
+    this.stepDescription = this.add.text(0, -80, '', {
+      fontSize: '15px',
       fontFamily: 'Arial',
       color: COLORS.TEXT,
       align: 'left',
-      lineSpacing: 8,
-      wordWrap: { width: 850 }
+      lineSpacing: 6,
+      wordWrap: { width: 820, useAdvancedWrap: true }
     }).setOrigin(0.5, 0)
     this.contentPanel.add(this.stepDescription)
 
-    // Action hint
-    this.actionHint = this.add.text(0, 180, '', {
-      fontSize: '18px',
+    // Action hint - moved up to avoid overlap
+    this.actionHint = this.add.text(0, 150, '', {
+      fontSize: '16px',
       fontFamily: 'Arial',
       color: COLORS.WARNING,
       fontStyle: 'bold',
@@ -120,16 +120,16 @@ export default class TutorialScene extends Phaser.Scene {
     }).setOrigin(0.5)
     this.contentPanel.add(this.actionHint)
 
-    // Animated pointer
-    this.pointer = this.add.text(0, 165, '▼', {
-      fontSize: '24px',
+    // Animated pointer - adjusted position
+    this.pointer = this.add.text(0, 135, '▼', {
+      fontSize: '20px',
       color: COLORS.WARNING
     }).setOrigin(0.5)
     this.contentPanel.add(this.pointer)
 
     this.tweens.add({
       targets: this.pointer,
-      y: 170,
+      y: 140,
       duration: 500,
       yoyo: true,
       repeat: -1
@@ -209,16 +209,18 @@ export default class TutorialScene extends Phaser.Scene {
     const btnText = step.next === 'complete' ? 'START GAME!' : 'CONTINUE'
     const btnColor = step.next === 'complete' ? COLORS.SUCCESS : COLORS.WARNING
 
+    // Position button below the panel, not overlapping content
     this.continueBtn = this.add.rectangle(
       this.cameras.main.width / 2,
-      this.cameras.main.height / 2 + 140,
+      this.cameras.main.height / 2 + 210,
       200, 50, btnColor
     ).setStrokeStyle(3, 0xFFFFFF)
       .setInteractive({ useHandCursor: true })
+      .setDepth(100)
 
     this.continueLbl = this.add.text(
       this.cameras.main.width / 2,
-      this.cameras.main.height / 2 + 140,
+      this.cameras.main.height / 2 + 210,
       btnText,
       {
         fontSize: '20px',
@@ -226,7 +228,7 @@ export default class TutorialScene extends Phaser.Scene {
         color: '#FFFFFF',
         fontStyle: 'bold'
       }
-    ).setOrigin(0.5)
+    ).setOrigin(0.5).setDepth(100)
 
     this.continueBtn.on('pointerover', () => {
       this.tweens.add({ targets: [this.continueBtn, this.continueLbl], scale: 1.1, duration: 100 })

@@ -189,13 +189,13 @@ export default class CombatScene extends Phaser.Scene {
 
     if (isPlayer) {
       // Player status
-      this.playerHullText = this.add.text(x + 20, y + 40, `Hull: ${this.combat.playerHull}`, {
+      this.playerHullText = this.add.text(x + 20, y + 40, `Hull: ${this.combat.playerHull}/${this.combat.playerMaxHull}`, {
         fontSize: '14px',
         fontFamily: 'Arial',
         color: COLORS.TEXT
       })
 
-      this.playerShieldText = this.add.text(x + 20, y + 65, `Shields: ${this.combat.playerShields}`, {
+      this.playerShieldText = this.add.text(x + 20, y + 65, `Shields: ${this.combat.playerShields}/${this.combat.playerMaxShields}`, {
         fontSize: '14px',
         fontFamily: 'Arial',
         color: COLORS.TEXT
@@ -517,8 +517,8 @@ export default class CombatScene extends Phaser.Scene {
 
   updateCombatUI() {
     // Update player status
-    this.playerHullText.setText(`Hull: ${this.combat.playerHull}`)
-    this.playerShieldText.setText(`Shields: ${this.combat.playerShields}`)
+    this.playerHullText.setText(`Hull: ${this.combat.playerHull}/${this.combat.playerMaxHull}`)
+    this.playerShieldText.setText(`Shields: ${this.combat.playerShields}/${this.combat.playerMaxShields}`)
 
     // Update enemy status
     this.enemyHullText.setText(`Hull: ${Math.floor(this.combat.enemy.hull)}/${this.combat.enemy.maxHull}`)
@@ -528,7 +528,7 @@ export default class CombatScene extends Phaser.Scene {
     this.turnText.setText(`Turn ${this.combat.turn}`)
 
     // Update ship visuals based on damage with 3D effects
-    const playerHullPercent = this.combat.playerHull / 100
+    const playerHullPercent = this.combat.playerHull / this.combat.playerMaxHull
     if (playerHullPercent < 0.3) {
       // Critical damage - add smoke particles
       this.vfx.createDamageSparks(this.playerShipContainer.x, this.playerShipContainer.y + 20)

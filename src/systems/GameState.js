@@ -279,6 +279,7 @@ export default class GameState {
       achievementSystem: this.achievementSystem.serialize(),
       awayMissionSystem: this.awayMissionSystem.serialize(),
       tutorialSystem: this.tutorialSystem.serialize(),
+      researchSystem: this.researchSystem.serialize(),
       achievementData: { ...this.achievementData }
     }
   }
@@ -319,6 +320,7 @@ export default class GameState {
     if (data.achievementSystem) this.achievementSystem.deserialize(data.achievementSystem)
     if (data.awayMissionSystem) this.awayMissionSystem.deserialize(data.awayMissionSystem)
     if (data.tutorialSystem) this.tutorialSystem.deserialize(data.tutorialSystem)
+    if (data.researchSystem) this.researchSystem.deserialize(data.researchSystem)
   }
 
   /**

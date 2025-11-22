@@ -208,7 +208,7 @@ export default class CombatSystem {
 
       case COMBAT_ACTIONS.DEFEND:
         // Regenerate shields, take reduced damage
-        combat.playerShields = Math.min(100, combat.playerShields + 15)
+        combat.playerShields = Math.min(combat.playerMaxShields, combat.playerShields + 15)
         this.addToLog('Shields regenerating... +15 shields')
         break
 
@@ -295,8 +295,8 @@ export default class CombatSystem {
     let result = {
       victory,
       log: combat.log,
-      hullDamage: 100 - combat.playerHull,
-      shieldDamage: 50 - combat.playerShields,
+      hullDamage: combat.playerMaxHull - combat.playerHull,
+      shieldDamage: combat.playerMaxShields - combat.playerShields,
       turns: combat.turn,
       loot: {}
     }

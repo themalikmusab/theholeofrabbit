@@ -21,28 +21,50 @@ export default class EventScene extends Phaser.Scene {
     this.add.rectangle(0, 0, width, height, 0x000000).setOrigin(0)
     this.createStarfield()
 
-    // Event panel
+    // Event panel - adjusted for better visibility
     const panelWidth = 1000
-    const panelHeight = 600
-    const panel = this.add.rectangle(width / 2, height / 2, panelWidth, panelHeight, parseInt(COLORS.UI_BG.replace('#', '0x')), 0.95)
+    const panelHeight = 560
+    const panel = this.add.rectangle(width / 2, height / 2 - 10, panelWidth, panelHeight, parseInt(COLORS.UI_BG.replace('#', '0x')), 0.95)
     panel.setStrokeStyle(3, parseInt(COLORS.PRIMARY.replace('#', '0x')))
 
-    // Title
-    this.add.text(width / 2, 140, this.event.title, {
-      font: 'bold 36px monospace',
-      fill: COLORS.PRIMARY,
+    // Title with glow effect
+    const title = this.add.text(width / 2, 130, this.event.title, {
+      fontSize: '34px',
+      fontFamily: 'Arial',
+      color: COLORS.PRIMARY,
+      fontStyle: 'bold',
       stroke: '#000000',
-      strokeThickness: 2
+      strokeThickness: 4
     }).setOrigin(0.5)
 
-    // Description
-    this.add.text(width / 2, 230, this.event.description, {
-      font: '18px monospace',
-      fill: COLORS.TEXT,
-      wordWrap: { width: panelWidth - 100 },
+    // Fade in animation
+    title.setAlpha(0)
+    this.tweens.add({
+      targets: title,
+      alpha: 1,
+      duration: 600,
+      ease: 'Power2'
+    })
+
+    // Description with better formatting
+    const desc = this.add.text(width / 2, 210, this.event.description, {
+      fontSize: '17px',
+      fontFamily: 'Arial',
+      color: COLORS.TEXT,
+      wordWrap: { width: panelWidth - 120 },
       align: 'center',
-      lineSpacing: 5
-    }).setOrigin(0.5)
+      lineSpacing: 8
+    }).setOrigin(0.5, 0)
+
+    // Fade in description
+    desc.setAlpha(0)
+    this.tweens.add({
+      targets: desc,
+      alpha: 1,
+      duration: 600,
+      delay: 300,
+      ease: 'Power2'
+    })
 
     // Choices
     this.createChoices()
@@ -67,44 +89,81 @@ export default class EventScene extends Phaser.Scene {
 
   createChoices() {
     const width = this.cameras.main.width
-    const startY = 400
+    const startY = 395
 
     const availableChoices = this.eventSystem.getAvailableChoices(this.event)
 
     availableChoices.forEach((choiceData, index) => {
-      const y = startY + (index * 65)
+      const y = startY + (index * 70)
       const choice = this.event.choices[choiceData.index]
 
       // Choice number and text
       const choiceText = `${index + 1}. ${choice.text}`
 
+      // Create button background
+      const buttonBg = this.add.rectangle(width / 2, y, 920, 58,
+        choiceData.available ? parseInt(COLORS.UI_BG.replace('#', '0x')) : 0x1a1a1a)
+      buttonBg.setStrokeStyle(2, choiceData.available ? parseInt(COLORS.PRIMARY.replace('#', '0x')) : 0x444444)
+
       const button = this.add.text(width / 2, y, choiceText, {
-        font: '20px monospace',
-        fill: choiceData.available ? COLORS.TEXT : '#666666',
-        backgroundColor: choiceData.available ? COLORS.UI_BG : '#0a0a0a',
-        padding: { x: 25, y: 12 },
-        wordWrap: { width: 900 }
+        fontSize: '18px',
+        fontFamily: 'Arial',
+        color: choiceData.available ? COLORS.TEXT : '#666666',
+        wordWrap: { width: 880 },
+        align: 'center'
       }).setOrigin(0.5)
 
+      // Fade in with stagger
+      button.setAlpha(0)
+      buttonBg.setAlpha(0)
+      this.tweens.add({
+        targets: [button, buttonBg],
+        alpha: 1,
+        duration: 400,
+        delay: 600 + (index * 150),
+        ease: 'Power2'
+      })
+
       if (choiceData.available) {
-        button.setInteractive()
+        buttonBg.setInteractive({ useHandCursor: true })
 
-        button.on('pointerover', () => {
-          button.setStyle({
-            fill: COLORS.PRIMARY,
-            backgroundColor: '#2a2a3e'
+        buttonBg.on('pointerover', () => {
+          buttonBg.setFillStyle(parseInt(COLORS.PRIMARY.replace('#', '0x')), 0.3)
+          button.setColor(COLORS.PRIMARY)
+          this.tweens.add({
+            targets: [buttonBg, button],
+            scaleX: 1.02,
+            scaleY: 1.02,
+            duration: 150,
+            ease: 'Back.easeOut'
           })
         })
 
-        button.on('pointerout', () => {
-          button.setStyle({
-            fill: COLORS.TEXT,
-            backgroundColor: COLORS.UI_BG
+        buttonBg.on('pointerout', () => {
+          buttonBg.setFillStyle(parseInt(COLORS.UI_BG.replace('#', '0x')))
+          button.setColor(COLORS.TEXT)
+          this.tweens.add({
+            targets: [buttonBg, button],
+            scaleX: 1,
+            scaleY: 1,
+            duration: 150,
+            ease: 'Back.easeIn'
           })
         })
 
-        button.on('pointerdown', () => {
-          this.onChoiceSelected(choiceData.index)
+        buttonBg.on('pointerdown', () => {
+          // Visual feedback
+          this.cameras.main.flash(150, 100, 200, 255, false)
+
+          // Disable all buttons
+          this.children.list.forEach(child => {
+            if (child.input) child.disableInteractive()
+          })
+
+          // Show selection with delay
+          this.time.delayedCall(200, () => {
+            this.onChoiceSelected(choiceData.index)
+          })
         })
       } else {
         // Show requirements
@@ -153,33 +212,40 @@ export default class EventScene extends Phaser.Scene {
     this.add.rectangle(0, 0, width, height, 0x000000).setOrigin(0)
     this.createStarfield()
 
-    // Outcome panel
-    const panel = this.add.rectangle(width / 2, height / 2, 900, 500, parseInt(COLORS.UI_BG.replace('#', '0x')), 0.95)
+    // Outcome panel - adjusted size and position
+    const panel = this.add.rectangle(width / 2, height / 2 - 20, 900, 420, parseInt(COLORS.UI_BG.replace('#', '0x')), 0.95)
     panel.setStrokeStyle(3, parseInt(COLORS.SUCCESS.replace('#', '0x')))
 
     // Title
-    this.add.text(width / 2, height / 2 - 180, 'OUTCOME', {
-      font: 'bold 32px monospace',
-      fill: COLORS.SUCCESS
+    this.add.text(width / 2, height / 2 - 220, 'OUTCOME', {
+      fontSize: '32px',
+      fontFamily: 'Arial',
+      color: COLORS.SUCCESS,
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 4
     }).setOrigin(0.5)
 
-    // Outcome text
-    this.add.text(width / 2, height / 2 - 80, result.text, {
-      font: '20px monospace',
-      fill: COLORS.TEXT,
-      wordWrap: { width: 800 },
+    // Outcome text with better layout
+    this.add.text(width / 2, height / 2 - 120, result.text, {
+      fontSize: '18px',
+      fontFamily: 'Arial',
+      color: COLORS.TEXT,
+      wordWrap: { width: 820 },
       align: 'center',
-      lineSpacing: 8
-    }).setOrigin(0.5)
+      lineSpacing: 10
+    }).setOrigin(0.5, 0)
 
-    // Effects applied
+    // Effects applied - positioned carefully
     if (result.effectsApplied && result.effectsApplied.length > 0) {
       const effectsText = result.effectsApplied.join('\n')
-      this.add.text(width / 2, height / 2 + 60, effectsText, {
-        font: '16px monospace',
-        fill: COLORS.WARNING,
-        align: 'center'
-      }).setOrigin(0.5)
+      this.add.text(width / 2, height / 2 + 40, effectsText, {
+        fontSize: '15px',
+        fontFamily: 'Arial',
+        color: COLORS.WARNING,
+        align: 'center',
+        lineSpacing: 5
+      }).setOrigin(0.5, 0)
     }
 
     // Resource display
@@ -193,33 +259,62 @@ export default class EventScene extends Phaser.Scene {
       return
     }
 
-    // Continue button
-    const button = this.add.text(width / 2, height / 2 + 180, 'Continue', {
-      font: '28px monospace',
-      fill: COLORS.TEXT,
-      backgroundColor: COLORS.UI_BG,
-      padding: { x: 40, y: 15 }
-    }).setOrigin(0.5).setInteractive()
+    // Continue button - clearly visible below panel
+    const btnY = height / 2 + 220
+    const button = this.add.rectangle(width / 2, btnY, 250, 55, parseInt(COLORS.SUCCESS.replace('#', '0x')))
+    button.setStrokeStyle(3, 0xFFFFFF)
+    button.setInteractive({ useHandCursor: true })
+    button.setDepth(100)
+
+    const buttonLabel = this.add.text(width / 2, btnY, 'CONTINUE ►', {
+      fontSize: '24px',
+      fontFamily: 'Arial',
+      color: '#FFFFFF',
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(100)
+
+    // Pulsing animation to make it clear
+    this.tweens.add({
+      targets: [button, buttonLabel],
+      scaleX: 1.05,
+      scaleY: 1.05,
+      duration: 800,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    })
 
     button.on('pointerover', () => {
-      button.setStyle({
-        fill: COLORS.PRIMARY,
-        backgroundColor: '#2a2a3e'
+      button.setFillStyle(parseInt(COLORS.PRIMARY.replace('#', '0x')))
+      this.tweens.killTweensOf([button, buttonLabel])
+      this.tweens.add({
+        targets: [button, buttonLabel],
+        scaleX: 1.1,
+        scaleY: 1.1,
+        duration: 100
       })
     })
 
     button.on('pointerout', () => {
-      button.setStyle({
-        fill: COLORS.TEXT,
-        backgroundColor: COLORS.UI_BG
+      button.setFillStyle(parseInt(COLORS.SUCCESS.replace('#', '0x')))
+      this.tweens.add({
+        targets: [button, buttonLabel],
+        scaleX: 1,
+        scaleY: 1,
+        duration: 100
       })
     })
 
     button.on('pointerdown', () => {
-      // Return to map
-      this.scene.start('MapScene', {
-        gameState: this.gameState,
-        eventSystem: this.eventSystem
+      // Flash effect for feedback
+      this.cameras.main.flash(200, 0, 255, 136, false)
+
+      // Return to map after brief delay
+      this.time.delayedCall(300, () => {
+        this.scene.start('MapScene', {
+          gameState: this.gameState,
+          eventSystem: this.eventSystem
+        })
       })
     })
   }

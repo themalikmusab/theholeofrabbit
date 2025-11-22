@@ -140,12 +140,23 @@ export default class CombatSystem {
       return null
     }
 
+    // Apply research bonuses to combat stats
+    const shieldCapacityBonus = this.gameState.researchSystem.getBonus('shieldCapacity')
+    const weaponDamageBonus = this.gameState.researchSystem.getBonus('weaponDamage')
+    const hullCapacityBonus = this.gameState.researchSystem.getBonus('hullCapacity')
+
+    const baseShields = this.gameState.resources.shields || 50
+    const baseWeapons = this.gameState.resources.weapons || 20
+    const baseHull = 100
+
     this.currentCombat = {
       enemy: new Enemy(enemyType),
       turn: 1,
-      playerHull: 100, // This should come from ship system
-      playerShields: this.gameState.resources.shields || 50,
-      playerWeapons: this.gameState.resources.weapons || 20,
+      playerHull: Math.floor(baseHull * hullCapacityBonus),
+      playerMaxHull: Math.floor(baseHull * hullCapacityBonus),
+      playerShields: Math.floor(baseShields * shieldCapacityBonus),
+      playerMaxShields: Math.floor(baseShields * shieldCapacityBonus),
+      playerWeapons: Math.floor(baseWeapons * weaponDamageBonus),
       log: [],
       startTime: Date.now()
     }

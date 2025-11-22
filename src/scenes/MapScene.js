@@ -336,10 +336,18 @@ export default class MapScene extends Phaser.Scene {
   }
 
   travelToSystem(system, fuelCost) {
-    console.log(`Traveling to ${system.name}, cost: ${fuelCost}`)
+    console.log(`Traveling to ${system.name}, base cost: ${fuelCost}`)
+
+    // Apply research bonuses to fuel consumption
+    const fuelBonus = this.gameState.researchSystem.getBonus('fuelConsumption')
+    const actualFuelCost = Math.max(1, Math.floor(fuelCost * (1 + fuelBonus)))
+
+    if (actualFuelCost < fuelCost) {
+      console.log(`Research bonus applied: ${fuelCost} -> ${actualFuelCost} fuel`)
+    }
 
     // Deduct fuel
-    this.gameState.modifyResource('fuel', -fuelCost)
+    this.gameState.modifyResource('fuel', -actualFuelCost)
 
     // Mark as visited
     this.gameState.visitSystem(system.id)
@@ -348,6 +356,12 @@ export default class MapScene extends Phaser.Scene {
 
     // Advance turn
     this.gameState.advanceTurn()
+
+    // Process research bonuses (resource generation, hull regen, etc.)
+    const turnEffects = this.gameState.researchSystem.processTurnEffects()
+    if (turnEffects.food > 0 || turnEffects.materials > 0 || turnEffects.morale > 0) {
+      console.log('Research turn effects:', turnEffects)
+    }
 
     // Update UI
     this.resourceDisplay.update()

@@ -11,6 +11,7 @@ export default class ResearchScene extends Phaser.Scene {
 
   init(data) {
     this.gameState = data.gameState
+    this.eventSystem = data.eventSystem
     this.returnScene = data.returnScene || 'ShipScene'
   }
 
@@ -65,7 +66,10 @@ export default class ResearchScene extends Phaser.Scene {
     }).setOrigin(0.5)
 
     backBtn.on('pointerdown', () => {
-      this.scene.start(this.returnScene, { gameState: this.gameState })
+      this.scene.start(this.returnScene, {
+        gameState: this.gameState,
+        eventSystem: this.eventSystem
+      })
     })
 
     backBtn.on('pointerover', () => {
@@ -303,7 +307,11 @@ export default class ResearchScene extends Phaser.Scene {
 
       // Refresh tree
       this.time.delayedCall(500, () => {
-        this.scene.restart({ gameState: this.gameState, returnScene: this.returnScene })
+        this.scene.restart({
+          gameState: this.gameState,
+          eventSystem: this.eventSystem,
+          returnScene: this.returnScene
+        })
       })
     } else {
       // Failure feedback

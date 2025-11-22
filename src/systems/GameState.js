@@ -34,6 +34,7 @@ export default class GameState {
 
     // Story flags for tracking player choices
     this.flags = []
+    this.flagValues = {} // For numeric/object flag values (faction rep, etc.)
 
     // Game progression
     this.turn = 0
@@ -150,6 +151,22 @@ export default class GameState {
   }
 
   /**
+   * Get a flag value (for numeric/object flags)
+   */
+  getFlag(flag) {
+    if (!this.flagValues) this.flagValues = {}
+    return this.flagValues[flag]
+  }
+
+  /**
+   * Set a flag value (for numeric/object flags)
+   */
+  setFlag(flag, value) {
+    if (!this.flagValues) this.flagValues = {}
+    this.flagValues[flag] = value
+  }
+
+  /**
    * Visit a star system
    */
   visitSystem(systemId) {
@@ -183,7 +200,7 @@ export default class GameState {
    */
   advanceTurn() {
     this.turn++
-    this.daysPassed += Phaser.Math.Between(1, 5)
+    this.daysPassed += Math.floor(Math.random() * 5) + 1
   }
 
   /**
@@ -244,6 +261,7 @@ export default class GameState {
       visitedSystems: [...this.visitedSystems],
       discoveredSystems: [...this.discoveredSystems],
       flags: [...this.flags],
+      flagValues: { ...this.flagValues },
       turn: this.turn,
       daysPassed: this.daysPassed,
       specialGoods: { ...this.specialGoods },
@@ -274,6 +292,7 @@ export default class GameState {
     this.visitedSystems = [...data.visitedSystems]
     this.discoveredSystems = [...data.discoveredSystems]
     this.flags = [...data.flags]
+    this.flagValues = data.flagValues || {}
     this.turn = data.turn
     this.daysPassed = data.daysPassed
     this.specialGoods = data.specialGoods || {}

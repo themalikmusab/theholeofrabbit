@@ -469,7 +469,7 @@
             "chance": 0.6,
             "effects": [
               { "type": "technology", "value": 200 },
-              { "type": "achievement", "id": "discover"}
+              { "type": "achievement", "id": "discoverer"}
             ],
             "text": "BREAKTHROUGH! You've gained knowledge beyond imagination. Humanity leaps forward!"
           },

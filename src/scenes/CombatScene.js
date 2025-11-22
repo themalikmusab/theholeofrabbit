@@ -585,7 +585,7 @@ export default class CombatScene extends Phaser.Scene {
       })
     } else {
       this.showMessage('Failed to flee! Taking damage!', COLORS.DANGER)
-      this.vfx.createHitEffect(this.playerShip.x, this.playerShip.y)
+      this.vfx.createHitEffect(this.playerShipContainer.x, this.playerShipContainer.y)
       this.cameras.main.shake(200, 0.005)
 
       this.time.delayedCall(1000, () => {

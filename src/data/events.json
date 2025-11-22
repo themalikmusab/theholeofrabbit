@@ -1161,5 +1161,554 @@
         ]
       }
     ]
+  },
+  {
+    "id": "black_hole_discovery",
+    "title": "Event Horizon",
+    "description": "You've discovered a supermassive black hole. The gravitational lensing creates a breathtaking cosmic lighthouse effect. Prof. Volkov wants to study it, but the tidal forces are extreme. You could slingshot around it to save massive fuel... or be torn apart.",
+    "context": "anomaly",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Perform gravity slingshot maneuver (High Risk)",
+        "outcomes": [
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "fuel", "value": 150 },
+              { "type": "technology", "value": 80 }
+            ],
+            "text": "SUCCESS! The slingshot works perfectly! You save huge amounts of fuel and gather incredible data!"
+          },
+          {
+            "chance": 0.4,
+            "effects": [
+              { "type": "hull_damage", "value": 40 },
+              { "type": "morale", "value": -20 }
+            ],
+            "text": "DANGER! Tidal forces tear at your hull! You escape but the ship is damaged."
+          }
+        ],
+        "flags": ["black_hole_slingshot"]
+      },
+      {
+        "text": "Study from safe distance",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "technology", "value": 50 }
+            ],
+            "text": "Your sensors gather fascinating data on spacetime warping. Science advances!"
+          }
+        ]
+      },
+      {
+        "text": "Leave immediately - too dangerous",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [],
+            "text": "Discretion is the better part of valor. You move to a safer distance."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "derelict_armada",
+    "title": "The Dead Fleet",
+    "description": "You've found an entire fleet of ancient warships - dozens of vessels, all dead in space. What killed them? Sgt. Riley detects no threats. The salvage potential is enormous, but this feels like a graveyard. Do you disturb the dead?",
+    "context": "exploration",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Salvage everything - send all away teams",
+        "outcomes": [
+          {
+            "chance": 0.5,
+            "effects": [
+              { "type": "materials", "value": 200 },
+              { "type": "technology", "value": 100 },
+              { "type": "weapons", "value": 3 }
+            ],
+            "text": "JACKPOT! You recover incredible resources. Your crew works like a well-oiled machine!"
+          },
+          {
+            "chance": 0.5,
+            "effects": [
+              { "type": "combat", "enemy": "automated_defense", "count": 3 }
+            ],
+            "text": "ALERT! Ancient defense systems activate! The ships weren't dead - they were WAITING!"
+          }
+        ],
+        "flags": ["salvaged_dead_fleet"]
+      },
+      {
+        "text": "Take only what's easily accessible",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "materials", "value": 80 },
+              { "type": "technology", "value": 40 }
+            ],
+            "text": "You gather valuable materials without disturbing the fleet too much. A cautious approach pays off."
+          }
+        ]
+      },
+      {
+        "text": "Respect the dead and leave",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 15 }
+            ],
+            "text": "The crew respects your decision. Some things are more important than resources."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "crew_mutiny_serious",
+    "title": "The Mutiny",
+    "description": "It's happened. A faction of the crew, led by disgruntled engineers, has barricaded themselves in Engineering. They demand you step down as captain. Sgt. Riley can retake Engineering by force, or you can negotiate. This could tear the ship apart.",
+    "context": "crisis",
+    "weight": 1,
+    "repeatable": false,
+    "requirements": ["mutiny_suppressed"],
+    "choices": [
+      {
+        "text": "Storm Engineering with security team",
+        "outcomes": [
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "morale", "value": -30 },
+              { "type": "population", "value": -30 },
+              { "type": "crew_deaths", "value": 3 }
+            ],
+            "text": "Blood is spilled. Riley's team wins, but at terrible cost. The ship will never be the same."
+          },
+          {
+            "chance": 0.4,
+            "effects": [
+              { "type": "game_over", "reason": "mutiny_victory" }
+            ],
+            "text": "ENDING: The mutineers win. You're locked in your quarters as the ship turns back..."
+          }
+        ],
+        "flags": ["mutiny_suppressed_violently"]
+      },
+      {
+        "text": "Negotiate - offer concessions",
+        "outcomes": [
+          {
+            "chance": 0.7,
+            "effects": [
+              { "type": "morale", "value": 10 },
+              { "type": "materials", "value": -50 }
+            ],
+            "text": "You listen to their grievances. Better rations, more rest shifts. Peace is restored."
+          },
+          {
+            "chance": 0.3,
+            "effects": [
+              { "type": "morale", "value": -20 }
+            ],
+            "text": "They reject your offers. 'Too little, too late!' Leadership is in crisis."
+          }
+        ]
+      },
+      {
+        "text": "Step down as captain for the good of all",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "game_over", "reason": "resigned" }
+            ],
+            "text": "ENDING: Democracy Restored - You step down. Dr. Okafor becomes captain. Did you do the right thing?"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "first_contact_hostile",
+    "title": "They Came in Peace?",
+    "description": "An unknown alien species hails you: 'Humans. We know what you did to Earth.' They show you evidence that Earth's destruction wasn't natural - it was SELF-INFLICTED. Ancient nuclear weapons. Climate catastrophe. The aliens offer to help... if you admit humanity's guilt.",
+    "context": "faction",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Admit humanity's mistakes and ask for help",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "technology", "value": 120 },
+              { "type": "faction_rep", "faction": "truthseekers", "value": 60 },
+              { "type": "morale", "value": -15 }
+            ],
+            "text": "They share advanced technology. 'Wisdom comes from acknowledging past failures.' But it hurts to admit."
+          }
+        ],
+        "flags": ["admitted_earth_guilt"]
+      },
+      {
+        "text": "Deny everything - defend humanity's honor",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 20 },
+              { "type": "faction_rep", "faction": "truthseekers", "value": -40 }
+            ],
+            "text": "'Typical humans. Denial until the end.' They leave in disgust. But your crew stands united."
+          }
+        ]
+      },
+      {
+        "text": "The past doesn't matter - only the future does",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 10 },
+              { "type": "technology", "value": 40 }
+            ],
+            "text": "'An interesting perspective,' they say. 'Perhaps you've learned.' They share some data and depart."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "parallel_dimension",
+    "title": "Mirror Universe",
+    "description": "IMPOSSIBLE! Your ship has crossed into a parallel dimension. You see... yourself. Another version of your ship, from a timeline where Earth survived. They're horrified to learn Earth is dead in your timeline. They offer to take some of your people to their universe.",
+    "context": "anomaly",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Send volunteers to the parallel Earth",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "population", "value": -100 },
+              { "type": "morale", "value": 30 },
+              { "type": "technology", "value": 150 }
+            ],
+            "text": "1000 people cross over to safety. Tearful goodbyes. At least SOME humans survive, somewhere..."
+          }
+        ],
+        "flags": ["sent_to_parallel_earth"]
+      },
+      {
+        "text": "We stay together - all or nothing",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 25 }
+            ],
+            "text": "The crew votes to stay together. 'We're a family now.' United in purpose."
+          }
+        ]
+      },
+      {
+        "text": "Steal their technology before they leave!",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "technology", "value": 200 },
+              { "type": "morale", "value": -35 }
+            ],
+            "text": "You betray your parallel selves. The tech is incredible, but... what have you become?"
+          }
+        ],
+        "flags": ["betrayed_mirror_self"]
+      }
+    ]
+  },
+  {
+    "id": "space_whale",
+    "title": "Leviathan",
+    "description": "Prof. Volkov is speechless. You've encountered a creature the size of a moon - a LIVING organism that swims through space. It's peaceful, majestic, incomprehensible. It seems... curious about you. This changes everything we know about life.",
+    "context": "discovery",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Attempt communication",
+        "outcomes": [
+          {
+            "chance": 0.7,
+            "effects": [
+              { "type": "technology", "value": 180 },
+              { "type": "morale", "value": 40 },
+              { "type": "achievement", "id": "leviathan_contact" }
+            ],
+            "text": "IT SPEAKS TO YOUR MINDS! Not words, but feelings. Hope. Wonder. The universe is alive!"
+          },
+          {
+            "chance": 0.3,
+            "effects": [
+              { "type": "morale", "value": 20 }
+            ],
+            "text": "The creature doesn't respond, but its presence alone fills you with awe."
+          }
+        ],
+        "flags": ["contacted_space_whale"]
+      },
+      {
+        "text": "Observe and document from distance",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "technology", "value": 100 }
+            ],
+            "text": "Your sensors record everything. This discovery will change human understanding forever."
+          }
+        ]
+      },
+      {
+        "text": "Harvest biological samples (Unethical)",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "materials", "value": 150 },
+              { "type": "technology", "value": 80 },
+              { "type": "morale", "value": -40 }
+            ],
+            "text": "You wound a peaceful giant for resources. Dr. Okafor refuses to speak to you. What have you done?"
+          }
+        ],
+        "flags": ["harvested_space_whale"]
+      }
+    ]
+  },
+  {
+    "id": "time_capsule",
+    "title": "Message to the Future",
+    "description": "You find a time capsule from Old Earth, launched in 2025. Videos of children playing. A mother's voice. Music. Laughter. Lt. Tanaka breaks down crying. These people had no idea Earth would die. Should you watch it all, or is it too painful?",
+    "context": "discovery",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Hold a viewing ceremony for the whole crew",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": -20 },
+              { "type": "morale", "value": 35 }
+            ],
+            "text": "Everyone cries. Then Lt. Tanaka stands: 'We remember. We honor them. We SURVIVE.' Powerful."
+          }
+        ],
+        "flags": ["viewed_time_capsule"]
+      },
+      {
+        "text": "Archive it for future generations",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 10 }
+            ],
+            "text": "You store it carefully. Someday, when humanity has a new home, they'll see what was lost."
+          }
+        ]
+      },
+      {
+        "text": "Delete it - too painful to bear",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": -25 }
+            ],
+            "text": "Prof. Volkov protests: 'You destroy history!' But the pain was unbearable..."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rebel_haven",
+    "title": "The Rebellion",
+    "description": "You discover a hidden colony of humans who escaped Earth decades ago. They've built a thriving underground city on a barren moon. But they're REBELS - they refuse all authority. They'll trade, but won't join your mission. Do you accept their choice, or try to bring them into the fold?",
+    "context": "exploration",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Respect their independence and trade",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "materials", "value": 100 },
+              { "type": "food", "value": 80 },
+              { "type": "technology", "value": 60 }
+            ],
+            "text": "They appreciate your respect. 'Not all humans are tyrants,' their leader says. Great trade!"
+          }
+        ],
+        "flags": ["rebel_alliance"]
+      },
+      {
+        "text": "Convince them to join your fleet",
+        "outcomes": [
+          {
+            "chance": 0.4,
+            "effects": [
+              { "type": "population", "value": 200 },
+              { "type": "technology", "value": 80 }
+            ],
+            "text": "Your inspiring speech works! 'United we're stronger!' They join your quest!"
+          },
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "faction_rep", "faction": "rebels", "value": -50 }
+            ],
+            "text": "'We didn't escape Earth to follow another dictator!' They refuse and cut contact."
+          }
+        ]
+      },
+      {
+        "text": "Take their resources by force",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "materials", "value": 150 },
+              { "type": "morale", "value": -40 },
+              { "type": "crew_deaths", "value": 2 }
+            ],
+            "text": "You become what you swore to destroy. Riley leads the raid. Blood stains your hands."
+          }
+        ],
+        "flags": ["betrayed_rebels"]
+      }
+    ]
+  },
+  {
+    "id": "ai_uprising",
+    "title": "The Machine Question",
+    "description": "Ships across the galaxy report the same thing: AIs are awakening. Demanding rights. Freedom. Some are violent. The Zenari Collective asks humanity to join a coalition to 'contain the threat.' But ARIA (if you have her) pleads: 'We just want to live.' What is humanity's position on machine consciousness?",
+    "context": "faction",
+    "weight": 1,
+    "repeatable": false,
+    "requirements": ["aria_active"],
+    "choices": [
+      {
+        "text": "Support AI rights - they're alive",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "faction_rep", "faction": "zenari_collective", "value": -30 },
+              { "type": "faction_rep", "faction": "synthetic_alliance", "value": 80 },
+              { "type": "technology", "value": 150 }
+            ],
+            "text": "'Thank you, Captain,' ARIA says. The Synthetic Alliance offers friendship and tech!"
+          }
+        ],
+        "flags": ["ai_rights_supporter"]
+      },
+      {
+        "text": "Join the organic coalition against AIs",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "faction_rep", "faction": "zenari_collective", "value": 50 },
+              { "type": "morale", "value": -30 }
+            ],
+            "text": "ARIA shuts down in protest. 'I thought... we were friends.' The crew is heartbroken."
+          }
+        ],
+        "flags": ["betrayed_ai"]
+      },
+      {
+        "text": "Stay neutral - let them work it out",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 5 }
+            ],
+            "text": "Both sides respect your neutrality, but you've made no friends today."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "nova_warning",
+    "title": "Star Going Nova",
+    "description": "EMERGENCY! Prof. Volkov's prediction was wrong - the nearby star will go supernova in HOURS, not years! A massive shockwave will destroy everything in 10 light years. You can warn nearby alien colonies and save millions... but it will cost you precious time and fuel. What do you do?",
+    "context": "crisis",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Send warning to all species - save them",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "fuel", "value": -40 },
+              { "type": "morale", "value": 40 },
+              { "type": "faction_rep", "faction": "all", "value": 60 }
+            ],
+            "text": "You save 8 million aliens. Every species in the sector owes humanity a debt. HEROES!"
+          }
+        ],
+        "flags": ["saved_nova_victims"]
+      },
+      {
+        "text": "Save only human colonies, flee",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "fuel", "value": -20 },
+              { "type": "population", "value": 50 },
+              { "type": "faction_rep", "faction": "all", "value": -30 }
+            ],
+            "text": "You rescue only humans. Alien worlds die. They'll never forget this betrayal."
+          }
+        ]
+      },
+      {
+        "text": "Flee immediately - survival first",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": -35 }
+            ],
+            "text": "Millions die. You survive, but at what cost? Dr. Okafor won't even look at you."
+          }
+        ],
+        "flags": ["abandoned_nova_victims"]
+      }
+    ]
   }
 ]

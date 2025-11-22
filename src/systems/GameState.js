@@ -9,6 +9,7 @@ import AchievementSystem from './AchievementSystem'
 import AwayMissionSystem from './AwayMissionSystem'
 import TutorialSystem from './TutorialSystem'
 import AudioSystem from './AudioSystem'
+import ResearchSystem from './ResearchSystem'
 
 /**
  * GameState - Manages all game data and state
@@ -52,6 +53,7 @@ export default class GameState {
     this.awayMissionSystem = new AwayMissionSystem(this)
     this.tutorialSystem = new TutorialSystem(this)
     this.audioSystem = new AudioSystem(null) // Will be initialized by scenes
+    this.researchSystem = new ResearchSystem(this)
 
     // Achievement tracking data
     this.achievementData = {

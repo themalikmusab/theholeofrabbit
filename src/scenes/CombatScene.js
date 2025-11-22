@@ -583,8 +583,13 @@ export default class CombatScene extends Phaser.Scene {
       this.time.delayedCall(1000, () => {
         this.endCombat(result)
       })
+    } else if (result.victory !== undefined) {
+      // Died while trying to flee
+      this.endCombat(result)
     } else {
-      this.showMessage('Failed to flee! Taking damage!', COLORS.DANGER)
+      // Failed to flee (enemy blocked or not enough fuel)
+      this.showMessage('Failed to flee!', COLORS.DANGER)
+      this.showCombatLog() // Update log to show reason
       this.vfx.createHitEffect(this.playerShipContainer.x, this.playerShipContainer.y)
       this.cameras.main.shake(200, 0.005)
 

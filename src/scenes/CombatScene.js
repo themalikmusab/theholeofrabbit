@@ -2,6 +2,7 @@
 import Phaser from 'phaser'
 import { COLORS } from '../config'
 import VisualEffects from '../systems/VisualEffects'
+import Visual3DSystem from '../systems/Visual3DSystem'
 import { COMBAT_ACTIONS } from '../systems/CombatSystem'
 
 export default class CombatScene extends Phaser.Scene {
@@ -22,8 +23,9 @@ export default class CombatScene extends Phaser.Scene {
 
     // Initialize visual effects
     this.vfx = new VisualEffects(this)
+    this.visual3D = new Visual3DSystem(this)
 
-    // Create animated background
+    // Create animated background with 3D effects
     this.createBackground(width, height)
 
     // Create UI
@@ -38,56 +40,99 @@ export default class CombatScene extends Phaser.Scene {
   }
 
   createBackground(width, height) {
-    // Animated starfield with parallax
-    this.starfieldLayers = this.vfx.createAnimatedStarfield(width, height)
+    // 3D starfield with depth layers
+    this.starfield3D = this.visual3D.create3DStarfield(width, height, 500)
+
+    // Add depth fog for atmosphere
+    this.depthFog = this.visual3D.createDepthFog(width, height)
+    this.depthFog.setDepth(-1)
 
     // Add nebula background
     this.nebula = this.vfx.createNebulaBackground(width, height, [0x440066, 0x660044, 0x004466])
-    this.nebula.setAlpha(0.2)
+    this.nebula.setAlpha(0.15)
+    this.nebula.setDepth(-2)
   }
 
   createShips(width, height) {
-    // Player ship (left side)
-    this.playerShip = this.add.circle(width * 0.25, height * 0.5, 30, 0x00AAFF)
-    this.playerShipOutline = this.add.circle(width * 0.25, height * 0.5, 32, 0x00DDFF, 0)
-    this.playerShipOutline.setStrokeStyle(2, 0x00DDFF)
+    // Player ship positions
+    const playerX = width * 0.25
+    const playerY = height * 0.5
+
+    // Enemy ship positions
+    const enemyX = width * 0.75
+    const enemyY = height * 0.5
+
+    // Create 3D isometric player ship
+    this.playerShipContainer = this.add.container(playerX, playerY)
+    this.playerShip3D = this.visual3D.createIsometricShip(0, 0, 80, 0x00AAFF)
+    this.playerShipContainer.add(this.playerShip3D.container)
+    this.playerShip3D.container.setRotation(Math.PI / 6) // Slight angle for depth
+
+    // Add dynamic lighting to player ship
+    this.playerShipLight = this.visual3D.createLight(0, -30, 40, 0x00DDFF, 0.6)
+    this.playerShipContainer.add(this.playerShipLight)
 
     // Shield effect for player
-    this.playerShield = this.add.circle(width * 0.25, height * 0.5, 50, 0x00AAFF, 0)
-    this.playerShield.setStrokeStyle(2, 0x00DDFF, 0.3)
+    this.playerShield = this.add.circle(0, 0, 70, 0x00AAFF, 0)
+    this.playerShield.setStrokeStyle(3, 0x00DDFF, 0.3)
+    this.playerShieldContainer = this.add.container(playerX, playerY)
+    this.playerShieldContainer.add(this.playerShield)
 
-    // Enemy ship (right side)
+    // Create 3D isometric enemy ship
     const enemy = this.combat.enemy
-    this.enemyShip = this.add.circle(width * 0.75, height * 0.5, 35, 0xFF3333)
-    this.enemyShipOutline = this.add.circle(width * 0.75, height * 0.5, 37, 0xFF6666, 0)
-    this.enemyShipOutline.setStrokeStyle(2, 0xFF6666)
+    this.enemyShipContainer = this.add.container(enemyX, enemyY)
+    this.enemyShip3D = this.visual3D.createIsometricShip(0, 0, 90, 0xFF3333)
+    this.enemyShipContainer.add(this.enemyShip3D.container)
+    this.enemyShip3D.container.setRotation(-Math.PI / 6) // Face player
+
+    // Add dynamic lighting to enemy ship
+    this.enemyShipLight = this.visual3D.createLight(0, -30, 40, 0xFF6666, 0.6)
+    this.enemyShipContainer.add(this.enemyShipLight)
 
     // Enemy shield
-    this.enemyShield = this.add.circle(width * 0.75, height * 0.5, 55, 0xFF3333, 0)
-    this.enemyShield.setStrokeStyle(2, 0xFF6666, 0.3)
+    this.enemyShield = this.add.circle(0, 0, 80, 0xFF3333, 0)
+    this.enemyShield.setStrokeStyle(3, 0xFF6666, 0.3)
+    this.enemyShieldContainer = this.add.container(enemyX, enemyY)
+    this.enemyShieldContainer.add(this.enemyShield)
 
-    // Engine trails
+    // Add shadows for depth
+    this.playerShadow = this.visual3D.createShadow(0, 60, 80, 40)
+    this.playerShipContainer.add(this.playerShadow)
+
+    this.enemyShadow = this.visual3D.createShadow(0, 60, 90, 45)
+    this.enemyShipContainer.add(this.enemyShadow)
+
+    // Engine trails with 3D effect
     this.time.addEvent({
-      delay: 100,
+      delay: 80,
       callback: () => {
-        if (this.playerShip) {
+        if (this.playerShipContainer) {
           this.vfx.createEngineTrail(
-            this.playerShip.x - 30,
-            this.playerShip.y,
+            this.playerShipContainer.x - 40,
+            this.playerShipContainer.y,
             Math.PI,
             0x00DDFF
           )
         }
-        if (this.enemyShip) {
+        if (this.enemyShipContainer) {
           this.vfx.createEngineTrail(
-            this.enemyShip.x + 30,
-            this.enemyShip.y,
+            this.enemyShipContainer.x + 40,
+            this.enemyShipContainer.y,
             0,
             0xFF6666
           )
         }
       },
       loop: true
+    })
+
+    // Pulsing light effect on ships
+    this.tweens.add({
+      targets: [this.playerShipLight, this.enemyShipLight],
+      alpha: 0.3,
+      duration: 1500,
+      yoyo: true,
+      repeat: -1
     })
   }
 
@@ -270,29 +315,58 @@ export default class CombatScene extends Phaser.Scene {
   }
 
   animatePlayerAction(action) {
-    const enemyX = this.enemyShip.x
-    const enemyY = this.enemyShip.y
+    const playerX = this.playerShipContainer.x
+    const playerY = this.playerShipContainer.y
+    const enemyX = this.enemyShipContainer.x
+    const enemyY = this.enemyShipContainer.y
 
     switch (action) {
       case COMBAT_ACTIONS.ATTACK:
-        // Fire weapon
-        const projectile = this.add.circle(this.playerShip.x, this.playerShip.y, 5, 0xFFFF00)
+        // Fire weapon with enhanced 3D effect
+        const projectile = this.add.circle(playerX, playerY, 6, 0xFFFF00)
+        projectile.setDepth(100)
+
+        // Add glow trail
+        const projectileGlow = this.visual3D.createLight(0, 0, 15, 0xFFFF00, 0.8)
+        projectileGlow.setDepth(99)
+
         this.tweens.add({
-          targets: projectile,
+          targets: [projectile, projectileGlow],
           x: enemyX,
           y: enemyY,
           duration: 400,
+          onUpdate: () => {
+            projectileGlow.x = projectile.x
+            projectileGlow.y = projectile.y
+          },
           onComplete: () => {
             projectile.destroy()
+            projectileGlow.destroy()
+
+            // Enhanced 3D explosion
+            this.visual3D.create3DExplosion(enemyX, enemyY, 0xFFAA00, 50, 30)
             this.vfx.createHitEffect(enemyX, enemyY)
-            this.cameras.main.shake(100, 0.003)
+            this.cameras.main.shake(100, 0.005)
+
+            // Flash enemy ship light
+            this.tweens.add({
+              targets: this.enemyShipLight,
+              alpha: 1,
+              duration: 100,
+              yoyo: true
+            })
           }
         })
         break
 
       case COMBAT_ACTIONS.DEFEND:
-        // Shield effect
-        this.playerShield.setAlpha(0.6)
+        // Shield effect with rotation
+        this.playerShield.setAlpha(0.7)
+        this.tweens.add({
+          targets: this.playerShieldContainer,
+          rotation: Math.PI * 2,
+          duration: 800
+        })
         this.tweens.add({
           targets: this.playerShield,
           alpha: 0.1,
@@ -301,24 +375,59 @@ export default class CombatScene extends Phaser.Scene {
         break
 
       case COMBAT_ACTIONS.EVADE:
-        // Dodge animation
+        // Dodge animation with 3D effect
         this.tweens.add({
-          targets: [this.playerShip, this.playerShipOutline, this.playerShield],
-          y: this.playerShip.y - 30,
+          targets: this.playerShipContainer,
+          y: playerY - 40,
           yoyo: true,
-          duration: 300
+          duration: 300,
+          ease: 'Quad.easeInOut'
+        })
+        this.tweens.add({
+          targets: this.playerShieldContainer,
+          y: playerY - 40,
+          yoyo: true,
+          duration: 300,
+          ease: 'Quad.easeInOut'
         })
         break
 
       case COMBAT_ACTIONS.SPECIAL:
-        // Overcharged attack
-        this.vfx.createWarpChargeEffect(this.playerShip.x, this.playerShip.y, 500)
+        // Overcharged attack with intense lighting
+        this.vfx.createWarpChargeEffect(playerX, playerY, 500)
+
+        // Brighten player ship light
+        this.tweens.add({
+          targets: this.playerShipLight,
+          scaleX: 2,
+          scaleY: 2,
+          alpha: 1,
+          duration: 500
+        })
+
         this.time.delayedCall(500, () => {
-          const beam = this.add.line(0, 0, this.playerShip.x, this.playerShip.y, enemyX, enemyY, 0x00FFFF)
-          beam.setLineWidth(5)
-          beam.setAlpha(0.8)
+          const beam = this.add.line(0, 0, playerX, playerY, enemyX, enemyY, 0x00FFFF)
+          beam.setLineWidth(8)
+          beam.setAlpha(0.9)
+          beam.setDepth(150)
+
+          // Massive 3D explosion
+          this.visual3D.create3DExplosion(enemyX, enemyY, 0x00FFFF, 80, 50)
           this.vfx.createExplosion(enemyX, enemyY, 0x00FFFF, 60)
-          this.time.delayedCall(200, () => beam.destroy())
+
+          this.cameras.main.shake(200, 0.008)
+
+          this.time.delayedCall(200, () => {
+            beam.destroy()
+            // Reset player ship light
+            this.tweens.add({
+              targets: this.playerShipLight,
+              scaleX: 1,
+              scaleY: 1,
+              alpha: 0.6,
+              duration: 300
+            })
+          })
         })
         break
     }
@@ -352,27 +461,55 @@ export default class CombatScene extends Phaser.Scene {
 
   animateEnemyTurn() {
     this.time.delayedCall(500, () => {
-      // Enemy attacks
-      const playerX = this.playerShip.x
-      const playerY = this.playerShip.y
+      // Enemy attacks with 3D effects
+      const playerX = this.playerShipContainer.x
+      const playerY = this.playerShipContainer.y
+      const enemyX = this.enemyShipContainer.x
+      const enemyY = this.enemyShipContainer.y
 
-      const projectile = this.add.circle(this.enemyShip.x, this.enemyShip.y, 5, 0xFF6666)
+      const projectile = this.add.circle(enemyX, enemyY, 6, 0xFF6666)
+      projectile.setDepth(100)
+
+      // Add glow trail
+      const projectileGlow = this.visual3D.createLight(0, 0, 15, 0xFF6666, 0.8)
+      projectileGlow.setDepth(99)
+
       this.tweens.add({
-        targets: projectile,
+        targets: [projectile, projectileGlow],
         x: playerX,
         y: playerY,
         duration: 400,
+        onUpdate: () => {
+          projectileGlow.x = projectile.x
+          projectileGlow.y = projectile.y
+        },
         onComplete: () => {
           projectile.destroy()
+          projectileGlow.destroy()
 
           if (this.combat.playerShields > 0) {
-            this.vfx.createShieldHit(playerX, playerY, 50)
+            this.vfx.createShieldHit(playerX, playerY, 70)
+            this.playerShield.setAlpha(0.6)
+            this.tweens.add({
+              targets: this.playerShield,
+              alpha: 0.1,
+              duration: 300
+            })
           } else {
+            this.visual3D.create3DExplosion(playerX, playerY, 0xFF6600, 40, 25)
             this.vfx.createHitEffect(playerX, playerY)
             this.vfx.createDamageSparks(playerX, playerY)
+
+            // Flash player ship light
+            this.tweens.add({
+              targets: this.playerShipLight,
+              alpha: 1,
+              duration: 100,
+              yoyo: true
+            })
           }
 
-          this.cameras.main.shake(100, 0.003)
+          this.cameras.main.shake(100, 0.005)
         }
       })
     })
@@ -390,19 +527,23 @@ export default class CombatScene extends Phaser.Scene {
     // Update turn
     this.turnText.setText(`Turn ${this.combat.turn}`)
 
-    // Update ship visuals based on damage
+    // Update ship visuals based on damage with 3D effects
     const playerHullPercent = this.combat.playerHull / 100
     if (playerHullPercent < 0.3) {
-      this.playerShip.setFillStyle(0x996600)
+      // Critical damage - add smoke particles
+      this.vfx.createDamageSparks(this.playerShipContainer.x, this.playerShipContainer.y + 20)
+      this.playerShip3D.container.setAlpha(0.7)
     } else if (playerHullPercent < 0.6) {
-      this.playerShip.setFillStyle(0x0088CC)
+      this.playerShip3D.container.setAlpha(0.85)
     }
 
     const enemyHullPercent = this.combat.enemy.hull / this.combat.enemy.maxHull
     if (enemyHullPercent < 0.3) {
-      this.enemyShip.setFillStyle(0x996600)
+      // Critical damage - add smoke particles
+      this.vfx.createDamageSparks(this.enemyShipContainer.x, this.enemyShipContainer.y + 20)
+      this.enemyShip3D.container.setAlpha(0.7)
     } else if (enemyHullPercent < 0.6) {
-      this.enemyShip.setFillStyle(0xCC4444)
+      this.enemyShip3D.container.setAlpha(0.85)
     }
   }
 
@@ -458,11 +599,27 @@ export default class CombatScene extends Phaser.Scene {
     this.disableButtons()
 
     if (result.victory) {
-      // Victory effects
-      this.vfx.createExplosion(this.enemyShip.x, this.enemyShip.y, 0xFF6600, 100)
-      this.enemyShip.destroy()
-      this.enemyShipOutline.destroy()
-      this.enemyShield.destroy()
+      // Victory effects with massive 3D explosion
+      const enemyX = this.enemyShipContainer.x
+      const enemyY = this.enemyShipContainer.y
+
+      // Multi-stage explosion effect
+      this.vfx.createExplosion(enemyX, enemyY, 0xFF6600, 120)
+      this.visual3D.create3DExplosion(enemyX, enemyY, 0xFF6600, 100, 60)
+
+      this.cameras.main.shake(300, 0.01)
+
+      // Destroy enemy ship with fade out
+      this.tweens.add({
+        targets: [this.enemyShipContainer, this.enemyShieldContainer],
+        alpha: 0,
+        scale: 0.5,
+        duration: 500,
+        onComplete: () => {
+          this.enemyShipContainer.destroy()
+          this.enemyShieldContainer.destroy()
+        }
+      })
 
       this.showMessage('ENEMY DESTROYED!', COLORS.SUCCESS)
 
@@ -470,13 +627,42 @@ export default class CombatScene extends Phaser.Scene {
         this.returnToMap(result)
       })
     } else if (result.fled) {
+      // Warp away effect
+      this.vfx.createWarpChargeEffect(
+        this.playerShipContainer.x,
+        this.playerShipContainer.y,
+        1000
+      )
+
+      this.tweens.add({
+        targets: [this.playerShipContainer, this.playerShieldContainer],
+        x: -200,
+        alpha: 0,
+        duration: 1000,
+        ease: 'Quad.easeIn'
+      })
+
       this.showMessage('Escaped from combat', COLORS.WARNING)
       this.time.delayedCall(1500, () => {
         this.returnToMap(result)
       })
     } else {
-      // Defeat
-      this.vfx.createExplosion(this.playerShip.x, this.playerShip.y, 0xFF6600, 100)
+      // Defeat with dramatic explosion
+      const playerX = this.playerShipContainer.x
+      const playerY = this.playerShipContainer.y
+
+      this.vfx.createExplosion(playerX, playerY, 0xFF6600, 100)
+      this.visual3D.create3DExplosion(playerX, playerY, 0xFF6600, 90, 50)
+
+      this.cameras.main.shake(250, 0.008)
+
+      this.tweens.add({
+        targets: [this.playerShipContainer, this.playerShieldContainer],
+        alpha: 0,
+        rotation: Math.PI,
+        duration: 800
+      })
+
       this.showMessage('CRITICAL DAMAGE! RETREATING!', COLORS.DANGER)
 
       this.time.delayedCall(2000, () => {

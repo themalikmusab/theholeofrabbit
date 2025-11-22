@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { COLORS } from '../config'
 import GalaxyGenerator from '../systems/GalaxyGenerator'
 import ResourceDisplay from '../ui/ResourceDisplay'
+import Visual3DSystem from '../systems/Visual3DSystem'
 
 export default class MapScene extends Phaser.Scene {
   constructor() {
@@ -32,8 +33,13 @@ export default class MapScene extends Phaser.Scene {
     this.mapOffsetX = 90
     this.mapOffsetY = 100
 
-    // Background
-    this.createStarfield()
+    // Background with 3D effects
+    this.visual3D = new Visual3DSystem(this)
+    this.starfield3D = this.visual3D.create3DStarfield(width, height, 400)
+
+    // Add depth fog for atmosphere
+    this.depthFog = this.visual3D.createDepthFog(width, height)
+    this.depthFog.setDepth(-1)
 
     // Map container
     this.mapContainer = this.add.container(this.mapOffsetX, this.mapOffsetY)
@@ -116,32 +122,87 @@ export default class MapScene extends Phaser.Scene {
     this.systemSprites = []
 
     this.systems.forEach(system => {
-      const circle = this.add.circle(system.x, system.y, 6, this.getSystemColor(system.type))
-      circle.setStrokeStyle(2, 0xffffff, 0.5)
+      // Determine planet size based on type
+      const sizeMap = {
+        start: 10,
+        habitable: 12,
+        resource: 8,
+        inhabited: 11,
+        ruins: 9,
+        anomaly: 10,
+        hostile: 9,
+        barren: 7,
+        haven: 14
+      }
+      const planetSize = sizeMap[system.type] || 8
 
-      // Store reference
-      circle.systemData = system
+      // Create 3D planet with atmosphere for certain types
+      const hasAtmosphere = ['habitable', 'inhabited', 'haven', 'start'].includes(system.type)
+      const planet = this.visual3D.create3DPlanet(
+        system.x,
+        system.y,
+        planetSize,
+        this.getSystemColor(system.type),
+        hasAtmosphere
+      )
+
+      // Store reference on container
+      planet.container.systemData = system
 
       // Make interactive
-      circle.setInteractive()
+      planet.container.setInteractive(
+        new Phaser.Geom.Circle(0, 0, planetSize + 5),
+        Phaser.Geom.Circle.Contains
+      )
 
-      // Hover effects
-      circle.on('pointerover', () => {
-        circle.setScale(1.5)
+      // Hover effects with 3D scale
+      planet.container.on('pointerover', () => {
+        this.tweens.add({
+          targets: planet.container,
+          scaleX: 1.4,
+          scaleY: 1.4,
+          duration: 200,
+          ease: 'Back.easeOut'
+        })
+
+        // Brighten atmosphere if present
+        if (planet.atmosphere) {
+          this.tweens.add({
+            targets: planet.atmosphere,
+            alpha: 0.8,
+            duration: 200
+          })
+        }
+
         this.showSystemInfo(system)
       })
 
-      circle.on('pointerout', () => {
-        circle.setScale(1)
+      planet.container.on('pointerout', () => {
+        this.tweens.add({
+          targets: planet.container,
+          scaleX: 1,
+          scaleY: 1,
+          duration: 200,
+          ease: 'Back.easeIn'
+        })
+
+        // Restore atmosphere
+        if (planet.atmosphere) {
+          this.tweens.add({
+            targets: planet.atmosphere,
+            alpha: 0.4,
+            duration: 200
+          })
+        }
       })
 
-      circle.on('pointerdown', () => {
+      planet.container.on('pointerdown', () => {
         this.onSystemClick(system)
       })
 
       // Label for visited/discovered systems
       if (system.visited || system.discovered) {
-        const label = this.add.text(system.x, system.y + 12, system.name, {
+        const label = this.add.text(system.x, system.y + planetSize + 8, system.name, {
           font: '9px monospace',
           fill: COLORS.TEXT,
           stroke: '#000000',
@@ -150,8 +211,8 @@ export default class MapScene extends Phaser.Scene {
         this.mapContainer.add(label)
       }
 
-      this.mapContainer.add(circle)
-      this.systemSprites.push(circle)
+      this.mapContainer.add(planet.container)
+      this.systemSprites.push(planet.container)
     })
   }
 
@@ -167,12 +228,28 @@ export default class MapScene extends Phaser.Scene {
       }
     })
 
-    // Highlight current system
+    // Highlight current system with pulsing glow
     const currentSystem = this.systems.find(s => s.id === this.gameState.currentSystem)
     if (currentSystem) {
-      const sprite = this.systemSprites.find(s => s.systemData.id === currentSystem.id)
-      if (sprite) {
-        sprite.setStrokeStyle(3, parseInt(COLORS.PRIMARY.replace('#', '0x')))
+      const planetContainer = this.systemSprites.find(s => s.systemData.id === currentSystem.id)
+      if (planetContainer) {
+        // Add pulsing ring around current system
+        const highlightRing = this.add.circle(currentSystem.x, currentSystem.y, 18, 0, 0)
+        highlightRing.setStrokeStyle(3, parseInt(COLORS.PRIMARY.replace('#', '0x')))
+        highlightRing.setDepth(10)
+
+        this.tweens.add({
+          targets: highlightRing,
+          scaleX: 1.3,
+          scaleY: 1.3,
+          alpha: 0.3,
+          duration: 1500,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
+        })
+
+        this.mapContainer.add(highlightRing)
       }
     }
   }

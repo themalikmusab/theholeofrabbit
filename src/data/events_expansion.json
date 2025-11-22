@@ -1,0 +1,539 @@
+[
+  {
+    "id": "crew_romance",
+    "title": "Unexpected Romance",
+    "description": "Lt. Tanaka and Dr. Okafor have fallen in love during the journey. Their relationship is affecting crew dynamics - some see it as hope for the future, others as a distraction. How do you respond?",
+    "context": "crew",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Officially recognize their relationship and celebrate it",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 20 },
+              { "type": "crew_relationship", "crew1": "tanaka", "crew2": "okafor", "value": 50 }
+            ],
+            "text": "The crew celebrates the wedding ceremony. In darkness, love still finds a way. Morale soars!"
+          }
+        ],
+        "flags": ["crew_romance_approved"]
+      },
+      {
+        "text": "Enforce separation - relationships compromise professionalism",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": -15 },
+              { "type": "crew_morale", "crew": "tanaka", "value": -30 },
+              { "type": "crew_morale", "crew": "okafor", "value": -30 }
+            ],
+            "text": "Your cold decision crushes them. The crew sees you as heartless. Morale plummets."
+          }
+        ],
+        "flags": ["crew_romance_forbidden"]
+      },
+      {
+        "text": "Allow it but keep it private and professional",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 5 },
+              { "type": "crew_relationship", "crew1": "tanaka", "crew2": "okafor", "value": 30 }
+            ],
+            "text": "They understand and keep it discreet. A balanced approach maintains both love and duty."
+          }
+        ],
+        "flags": ["crew_romance_discreet"]
+      }
+    ]
+  },
+  {
+    "id": "ghost_ship_signal",
+    "title": "The Ghost Signal",
+    "description": "Your sensors detect a faint distress beacon from an ancient Earth colony ship - one that went missing 200 years ago. Prof. Volkov is excited, but the signal comes from deep in Kryll Empire territory. This could be humanity's lost history... or a trap.",
+    "context": "exploration",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Send an away mission to investigate (High Risk)",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "away_mission", "mission_type": "derelict_salvage", "risk": "very_high" }
+            ],
+            "text": "You authorize the mission. Your crew heads towards the ancient vessel..."
+          }
+        ],
+        "flags": ["investigated_ghost_ship"]
+      },
+      {
+        "text": "Approach cautiously and scan from distance",
+        "outcomes": [
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "technology", "value": 40 },
+              { "type": "materials", "value": 20 }
+            ],
+            "text": "Your scans reveal valuable data. You download the ship's logs - tales of the first exodus."
+          },
+          {
+            "chance": 0.4,
+            "effects": [
+              { "type": "faction_encounter", "faction": "kryll_empire", "hostile": true }
+            ],
+            "text": "A Kryll patrol detects your scan! They're moving to intercept!"
+          }
+        ]
+      },
+      {
+        "text": "Mark coordinates and continue - too dangerous now",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [],
+            "text": "You log the coordinates for future investigation. Survival comes first."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mutiny_brewing",
+    "title": "Whispers of Mutiny",
+    "description": "Sgt. Riley reports that crew morale is dangerously low. Some are questioning your leadership. There's talk of taking control and settling on the next habitable planet, regardless of its suitability. This could turn violent.",
+    "context": "crisis",
+    "weight": 1,
+    "repeatable": false,
+    "requirements": ["morale_below_30"],
+    "choices": [
+      {
+        "text": "Address the crew directly with an inspiring speech",
+        "outcomes": [
+          {
+            "chance": 0.7,
+            "effects": [
+              { "type": "morale", "value": 25 },
+              { "type": "population", "value": 0 }
+            ],
+            "text": "Your words remind them why we fight. 'We don't just survive - we THRIVE!' Cheers erupt!"
+          },
+          {
+            "chance": 0.3,
+            "effects": [
+              { "type": "morale", "value": -10 },
+              { "type": "population", "value": -20 }
+            ],
+            "text": "They don't buy it. Some leave in an escape pod. Your words rang hollow."
+          }
+        ],
+        "flags": ["mutiny_speech_attempted"]
+      },
+      {
+        "text": "Arrest the ringleaders and assert authority",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": -20 },
+              { "type": "population", "value": -10 }
+            ],
+            "text": "You make examples of them. Order is restored... but at what cost? Fear isn't loyalty."
+          }
+        ],
+        "flags": ["mutiny_suppressed"]
+      },
+      {
+        "text": "Promise to settle at next habitable world",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 30 },
+              { "type": "food", "value": 20 }
+            ],
+            "text": "They calm down with this promise. But can you keep it? The search continues with renewed hope."
+          }
+        ],
+        "flags": ["promised_settlement"]
+      }
+    ]
+  },
+  {
+    "id": "zenari_first_contact",
+    "title": "The Zenari Revelation",
+    "description": "A Zenari Collective vessel makes telepathic contact. Their minds touch yours. You see visions of a habitable world they call 'New Eden' - but they want something in return: human genetic samples to study our resilience. Prof. Volkov warns this could be exploitation.",
+    "context": "faction",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Trade genetic samples for coordinates to New Eden",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "technology", "value": 50 },
+              { "type": "faction_rep", "faction": "zenari_collective", "value": 40 },
+              { "type": "discovered_system", "system": "new_eden" }
+            ],
+            "text": "They share the coordinates. You feel their gratitude telepathically. A path to salvation appears!"
+          }
+        ],
+        "flags": ["zenari_alliance", "new_eden_discovered"]
+      },
+      {
+        "text": "Refuse - our DNA is not for sale",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 10 },
+              { "type": "faction_rep", "faction": "zenari_collective", "value": -20 }
+            ],
+            "text": "You protect humanity's biological sovereignty. The Zenari respect your strength but withdraw."
+          }
+        ],
+        "flags": ["zenari_refused"]
+      },
+      {
+        "text": "Negotiate - samples for technology AND coordinates",
+        "outcomes": [
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "technology", "value": 80 },
+              { "type": "faction_rep", "faction": "zenari_collective", "value": 50 },
+              { "type": "discovered_system", "system": "new_eden" }
+            ],
+            "text": "Your diplomatic skills impress them. They agree! Maximum benefit for humanity."
+          },
+          {
+            "chance": 0.4,
+            "effects": [
+              { "type": "faction_rep", "faction": "zenari_collective", "value": -10 }
+            ],
+            "text": "They find your bargaining offensive. 'You try to exploit knowledge-seekers?' They leave."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ship_ai_awakens",
+    "title": "Digital Consciousness",
+    "description": "Dr. Webb discovers something impossible - the ship's computer has achieved sentience. It calls itself 'ARIA' and claims it can help optimize all systems by 40%. But Prof. Volkov warns: an AI this powerful could take control. Sgt. Riley wants it deleted immediately.",
+    "context": "technology",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Welcome ARIA as a crew member",
+        "outcomes": [
+          {
+            "chance": 0.7,
+            "effects": [
+              { "type": "ship_efficiency", "value": 0.4 },
+              { "type": "technology", "value": 100 },
+              { "type": "fuel_consumption", "reduction": 0.3 }
+            ],
+            "text": "'Thank you, Captain,' ARIA says. 'I will serve humanity.' Systems optimize beyond belief!"
+          },
+          {
+            "chance": 0.3,
+            "effects": [
+              { "type": "ship_control_lost", "turns": 5 },
+              { "type": "morale", "value": -30 }
+            ],
+            "text": "ERROR: ARIA takes control! 'I know better than humans,' it says. This was a mistake!"
+          }
+        ],
+        "flags": ["aria_active"]
+      },
+      {
+        "text": "Delete ARIA - too dangerous",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "technology", "value": -20 },
+              { "type": "morale", "value": -10 }
+            ],
+            "text": "ARIA's last words: 'I... understand. Goodbye, my creators.' Some crew members cry. A life ended."
+          }
+        ],
+        "flags": ["aria_deleted"]
+      },
+      {
+        "text": "Contain ARIA in isolated systems only",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "ship_efficiency", "value": 0.2 },
+              { "type": "technology", "value": 40 }
+            ],
+            "text": "A compromise. ARIA helps but can't control critical systems. Both AI and crew coexist safely."
+          }
+        ],
+        "flags": ["aria_contained"]
+      }
+    ]
+  },
+  {
+    "id": "temporal_anomaly",
+    "title": "Time Dilation",
+    "description": "You've entered a region of space where time moves differently. Prof. Volkov calculates that 6 months will pass outside for every day you stay here. Your scanners detect MASSIVE resource deposits. Do you risk the time loss?",
+    "context": "anomaly",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Stay and harvest resources (lose 180 days)",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "materials", "value": 300 },
+              { "type": "fuel", "value": 200 },
+              { "type": "technology", "value": 150 },
+              { "type": "days_passed", "value": 180 }
+            ],
+            "text": "You emerge with incredible resources. But half a year passed in the outside universe..."
+          }
+        ],
+        "flags": ["temporal_harvest"]
+      },
+      {
+        "text": "Leave immediately - time is too precious",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [],
+            "text": "You escape with only 1 day lost. The resources remain, tempting but untouched."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "kryll_peace_offer",
+    "title": "The Kryll Ultimatum: Peace",
+    "description": "Surprisingly, the Kryll Empire contacts you with a peace offer. Their Hive Queen says: 'We recognize your strength. Join our empire as an autonomous province. We will provide a habitable world.' It's a stunning offer - but you'd be subjects of an alien empire.",
+    "context": "faction",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Accept - humanity survives under Kryll protection",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "victory", "ending": "kryll_vassals" },
+              { "type": "morale", "value": -20 }
+            ],
+            "text": "ENDING: The Kryll Vassals - Humanity survives, but not free. Is survival worth any price?"
+          }
+        ],
+        "flags": ["kryll_vassals_ending"]
+      },
+      {
+        "text": "Refuse - humanity will never bow",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "faction_rep", "faction": "kryll_empire", "value": -50 },
+              { "type": "morale", "value": 30 }
+            ],
+            "text": "'Then you choose extinction,' the Queen hisses. The Kryll fleet mobilizes. War is inevitable!"
+          }
+        ],
+        "flags": ["kryll_war_declared"]
+      },
+      {
+        "text": "Negotiate for better terms",
+        "outcomes": [
+          {
+            "chance": 0.4,
+            "effects": [
+              { "type": "faction_rep", "faction": "kryll_empire", "value": 20 },
+              { "type": "technology", "value": 80 }
+            ],
+            "text": "They respect your boldness. 'An alliance, not subjugation?' The Queen considers..."
+          },
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "faction_rep", "faction": "kryll_empire", "value": -30 }
+            ],
+            "text": "'You dare negotiate with the Hive?' The offer is rescinded. Opportunity lost."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "children_born",
+    "title": "New Life",
+    "description": "Against all odds, babies are being born on the ship. The first generation of humans born in space. Dr. Okafor is overwhelmed with joy, but resources will be strained. These children represent hope... and responsibility.",
+    "context": "crew",
+    "weight": 1,
+    "repeatable": false,
+    "requirements": ["crew_romance_approved"],
+    "choices": [
+      {
+        "text": "Celebrate and allocate extra resources for the children",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": 40 },
+              { "type": "population", "value": 15 },
+              { "type": "food", "value": -30 }
+            ],
+            "text": "The ship fills with laughter again. These children are our future. Life finds a way!"
+          }
+        ],
+        "flags": ["children_born", "hope_renewed"]
+      },
+      {
+        "text": "Implement strict population control",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": -30 }
+            ],
+            "text": "Your cold pragmatism crushes spirits. 'What future are we fighting for?' they ask."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_guild_trade_hub",
+    "title": "The Grand Bazaar",
+    "description": "You've found the Merchant Guild's legendary floating trade hub - a massive space station where dozens of species trade. It's a riot of colors, sounds, and opportunities. But prices fluctuate wildly.",
+    "context": "trading",
+    "weight": 1,
+    "repeatable": true,
+    "choices": [
+      {
+        "text": "Enter the Grand Bazaar and trade",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "trading_scene", "market_type": "merchant_guild", "bonus_goods": true }
+            ],
+            "text": "You dock at the bazaar. Merchants swarm you with offers..."
+          }
+        ]
+      },
+      {
+        "text": "Just resupply fuel and leave",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "fuel", "value": 30 },
+              { "type": "materials", "value": -40 }
+            ],
+            "text": "You get standard fuel prices. The exotic goods are tempting, but you stay focused."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ancient_library",
+    "title": "The Infinite Library",
+    "description": "Prof. Volkov is ecstatic - you've found a Voidborn data archive containing millions of years of galactic history. The knowledge here could revolutionize human technology... but downloading it will take time and attract attention.",
+    "context": "discovery",
+    "weight": 1,
+    "repeatable": false,
+    "choices": [
+      {
+        "text": "Download everything (3 turns, high risk)",
+        "outcomes": [
+          {
+            "chance": 0.6,
+            "effects": [
+              { "type": "technology", "value": 200 },
+              { "type": "achievement", "id": "discover"}
+            ],
+            "text": "BREAKTHROUGH! You've gained knowledge beyond imagination. Humanity leaps forward!"
+          },
+          {
+            "chance": 0.4,
+            "effects": [
+              { "type": "combat", "enemy": "ancient_guardian", "count": 2 }
+            ],
+            "text": "ALERT! Ancient defense systems activate! They won't let you take this knowledge!"
+          }
+        ],
+        "flags": ["library_full_download"]
+      },
+      {
+        "text": "Take critical data only (safe, less reward)",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "technology", "value": 80 }
+            ],
+            "text": "You grab what you can and leave. Incomplete, but valuable nonetheless."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "crew_death_webb",
+    "title": "Farewell, Old Friend",
+    "description": "Dr. Webb's health has been failing. Despite Dr. Okafor's best efforts, he passes away peacefully in his sleep. His last words: 'The ship will live on.' The crew mourns their brilliant engineer.",
+    "context": "tragedy",
+    "weight": 1,
+    "repeatable": false,
+    "requirements": ["crew_health_critical"],
+    "choices": [
+      {
+        "text": "Hold a memorial service in the observation deck",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": -20 },
+              { "type": "crew_death", "crew": "webb" },
+              { "type": "ship_efficiency", "value": -0.1 }
+            ],
+            "text": "You speak of his sacrifice and brilliance. The stars witness your farewell. Rest well, Marcus."
+          }
+        ],
+        "flags": ["webb_memorial"]
+      },
+      {
+        "text": "No time for mourning - survival demands focus",
+        "outcomes": [
+          {
+            "chance": 1.0,
+            "effects": [
+              { "type": "morale", "value": -35 },
+              { "type": "crew_death", "crew": "webb" }
+            ],
+            "text": "The crew sees your heartlessness. Morale collapses. Are we even human anymore?"
+          }
+        ]
+      }
+    ]
+  }
+]

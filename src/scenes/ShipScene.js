@@ -9,6 +9,7 @@ export default class ShipScene extends Phaser.Scene {
 
   init(data) {
     this.gameState = data.gameState
+    this.eventSystem = data.eventSystem
   }
 
   create() {
@@ -59,13 +60,17 @@ export default class ShipScene extends Phaser.Scene {
     this.createButton(width / 2 - spacing, buttonY, '🔬 RESEARCH', () => {
       this.scene.start('ResearchScene', {
         gameState: this.gameState,
+        eventSystem: this.eventSystem,
         returnScene: 'ShipScene'
       })
     }, COLORS.PRIMARY)
 
     // Ship Interior
     this.createButton(width / 2, buttonY, '🚪 SHIP INTERIOR', () => {
-      this.scene.start('ShipInteriorScene', { gameState: this.gameState })
+      this.scene.start('ShipInteriorScene', {
+        gameState: this.gameState,
+        eventSystem: this.eventSystem
+      })
     }, 0x00AA88)
 
     // Systems Status
@@ -216,7 +221,10 @@ export default class ShipScene extends Phaser.Scene {
     })
 
     backBtn.on('pointerdown', () => {
-      this.scene.start('MapScene', { gameState: this.gameState })
+      this.scene.start('MapScene', {
+        gameState: this.gameState,
+        eventSystem: this.eventSystem
+      })
     })
   }
 }

@@ -140,12 +140,23 @@ export default class CombatSystem {
       return null
     }
 
+    // Apply research bonuses to combat stats
+    const shieldCapacityBonus = this.gameState.researchSystem.getBonus('shieldCapacity')
+    const weaponDamageBonus = this.gameState.researchSystem.getBonus('weaponDamage')
+    const hullCapacityBonus = this.gameState.researchSystem.getBonus('hullCapacity')
+
+    const baseShields = this.gameState.resources.shields || 50
+    const baseWeapons = this.gameState.resources.weapons || 20
+    const baseHull = 100
+
     this.currentCombat = {
       enemy: new Enemy(enemyType),
       turn: 1,
-      playerHull: 100, // This should come from ship system
-      playerShields: this.gameState.resources.shields || 50,
-      playerWeapons: this.gameState.resources.weapons || 20,
+      playerHull: Math.floor(baseHull * hullCapacityBonus),
+      playerMaxHull: Math.floor(baseHull * hullCapacityBonus),
+      playerShields: Math.floor(baseShields * shieldCapacityBonus),
+      playerMaxShields: Math.floor(baseShields * shieldCapacityBonus),
+      playerWeapons: Math.floor(baseWeapons * weaponDamageBonus),
       log: [],
       startTime: Date.now()
     }
@@ -197,7 +208,7 @@ export default class CombatSystem {
 
       case COMBAT_ACTIONS.DEFEND:
         // Regenerate shields, take reduced damage
-        combat.playerShields = Math.min(100, combat.playerShields + 15)
+        combat.playerShields = Math.min(combat.playerMaxShields, combat.playerShields + 15)
         this.addToLog('Shields regenerating... +15 shields')
         break
 
@@ -284,8 +295,8 @@ export default class CombatSystem {
     let result = {
       victory,
       log: combat.log,
-      hullDamage: 100 - combat.playerHull,
-      shieldDamage: 50 - combat.playerShields,
+      hullDamage: combat.playerMaxHull - combat.playerHull,
+      shieldDamage: combat.playerMaxShields - combat.playerShields,
       turns: combat.turn,
       loot: {}
     }
@@ -331,6 +342,18 @@ export default class CombatSystem {
   attemptFlee() {
     if (!this.currentCombat) return null
 
+    // Check if we have enough fuel to flee
+    const fuelCost = 10
+    const currentFuel = this.gameState.getResource('fuel')
+    if (currentFuel < fuelCost) {
+      this.addToLog('Not enough fuel to flee! Need 10 fuel.')
+      return {
+        fled: false,
+        ongoing: true,
+        combat: this.currentCombat
+      }
+    }
+
     // Pilot skill increases flee chance
     const pilotBonus = this.crewSystem.getSkillBonus('pilot')
     const fleeChance = 0.5 + pilotBonus
@@ -340,10 +363,10 @@ export default class CombatSystem {
       const result = {
         fled: true,
         log: this.currentCombat.log,
-        fuelCost: 10
+        fuelCost
       }
 
-      this.gameState.modifyResource('fuel', -10)
+      this.gameState.modifyResource('fuel', -fuelCost)
       this.crewSystem.modifyAllMorale(-5, 'Fled from combat')
       this.currentCombat = null
 
@@ -352,9 +375,27 @@ export default class CombatSystem {
       this.addToLog('Failed to flee! Enemy blocks escape route!')
       // Enemy gets free attack
       const enemy = this.currentCombat.enemy
-      const damage = enemy.weapons
-      this.currentCombat.playerHull -= damage
-      this.addToLog(`Took ${damage} damage while trying to flee!`)
+      let damage = enemy.weapons
+
+      // Apply damage to shields first, then hull (consistent with combat logic)
+      const combat = this.currentCombat
+      if (combat.playerShields > 0) {
+        const shieldDamage = Math.min(combat.playerShields, damage)
+        combat.playerShields -= shieldDamage
+        damage -= shieldDamage
+        this.addToLog(`Shields absorbed ${shieldDamage} damage!`)
+      }
+
+      if (damage > 0) {
+        combat.playerHull -= damage
+        this.addToLog(`Hull damaged! -${damage} HP`)
+
+        // Check if flee damage killed the player
+        if (combat.playerHull <= 0) {
+          this.addToLog('CRITICAL DAMAGE! Ship systems failing!')
+          return this.endCombat(false)
+        }
+      }
 
       return {
         fled: false,

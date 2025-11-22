@@ -112,7 +112,7 @@
     "context": "crisis",
     "weight": 1,
     "repeatable": false,
-    "requirements": ["morale_below_30"],
+    "prerequisiteFlags": ["morale_below_30"],
     "choices": [
       {
         "text": "Address the crew directly with an inspiring speech",
@@ -388,7 +388,7 @@
     "context": "crew",
     "weight": 1,
     "repeatable": false,
-    "requirements": ["crew_romance_approved"],
+    "prerequisiteFlags": ["crew_romance_approved"],
     "choices": [
       {
         "text": "Celebrate and allocate extra resources for the children",
@@ -469,7 +469,7 @@
             "chance": 0.6,
             "effects": [
               { "type": "technology", "value": 200 },
-              { "type": "achievement", "id": "discover"}
+              { "type": "achievement", "id": "discoverer"}
             ],
             "text": "BREAKTHROUGH! You've gained knowledge beyond imagination. Humanity leaps forward!"
           },
@@ -504,7 +504,7 @@
     "context": "tragedy",
     "weight": 1,
     "repeatable": false,
-    "requirements": ["crew_health_critical"],
+    "prerequisiteFlags": ["crew_health_critical"],
     "choices": [
       {
         "text": "Hold a memorial service in the observation deck",

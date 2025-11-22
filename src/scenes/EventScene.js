@@ -311,11 +311,68 @@ export default class EventScene extends Phaser.Scene {
 
       // Return to map after brief delay
       this.time.delayedCall(300, () => {
+        // Handle special effects before returning (combat, missions, etc.)
+        if (result.specialEffects && result.specialEffects.length > 0) {
+          this.handleSpecialEffects(result.specialEffects)
+        } else {
+          this.scene.start('MapScene', {
+            gameState: this.gameState,
+            eventSystem: this.eventSystem
+          })
+        }
+      })
+    })
+  }
+
+  handleSpecialEffects(specialEffects) {
+    // Process special effects that need scene transitions
+    const firstEffect = specialEffects[0]
+
+    switch (firstEffect.type) {
+      case 'combat':
+        // Start combat with specified enemy
+        const combat = this.gameState.combatSystem.startCombat(firstEffect.enemy.toUpperCase())
+        if (combat) {
+          this.scene.start('CombatScene', {
+            gameState: this.gameState,
+            eventSystem: this.eventSystem,
+            combat,
+            returnScene: 'MapScene'
+          })
+        } else {
+          console.error('Failed to start combat:', firstEffect.enemy)
+          this.scene.start('MapScene', {
+            gameState: this.gameState,
+            eventSystem: this.eventSystem
+          })
+        }
+        break
+
+      case 'away_mission':
+        // TODO: Implement away mission scene when available
+        console.log('Away mission triggered:', firstEffect.mission)
         this.scene.start('MapScene', {
           gameState: this.gameState,
           eventSystem: this.eventSystem
         })
-      })
-    })
+        break
+
+      case 'faction_encounter':
+        // TODO: Implement faction encounter scene when available
+        console.log('Faction encounter triggered:', firstEffect.faction)
+        this.scene.start('MapScene', {
+          gameState: this.gameState,
+          eventSystem: this.eventSystem
+        })
+        break
+
+      default:
+        // Unknown special effect, return to map
+        console.warn('Unknown special effect type:', firstEffect.type)
+        this.scene.start('MapScene', {
+          gameState: this.gameState,
+          eventSystem: this.eventSystem
+        })
+    }
   }
 }

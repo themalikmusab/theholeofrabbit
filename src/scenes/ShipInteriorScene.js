@@ -9,6 +9,7 @@ export default class ShipInteriorScene extends Phaser.Scene {
 
   init(data) {
     this.gameState = data.gameState
+    this.eventSystem = data.eventSystem
     this.returnScene = data.returnScene || 'MapScene'
     this.returnData = data.returnData || {}
   }
@@ -487,7 +488,10 @@ export default class ShipInteriorScene extends Phaser.Scene {
   openNavigationInterface() {
     this.showMessage('Navigation: Return to galaxy map to plot course.')
     this.time.delayedCall(1500, () => {
-      this.scene.start('MapScene', { gameState: this.gameState })
+      this.scene.start('MapScene', {
+        gameState: this.gameState,
+        eventSystem: this.eventSystem
+      })
     })
   }
 

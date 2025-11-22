@@ -175,6 +175,8 @@ export default class EventSystem {
 
     // Apply effects
     const effectsApplied = []
+    const specialEffects = [] // For effects that need special handling (combat, missions, etc.)
+
     if (selectedOutcome.effects) {
       selectedOutcome.effects.forEach(effect => {
         if (effect.type === 'flag') {
@@ -190,8 +192,71 @@ export default class EventSystem {
           // Modify character opinion
           this.gameState.modifyCharacterOpinion(effect.character, effect.value)
           effectsApplied.push(`${effect.character} opinion: ${effect.value > 0 ? '+' : ''}${effect.value}`)
+        } else if (effect.type === 'crew_relationship') {
+          // Modify relationship between crew members
+          if (effect.character) {
+            this.gameState.modifyCharacterOpinion(effect.character, effect.value)
+            effectsApplied.push(`Crew relationship changed: ${effect.character}`)
+          }
+        } else if (effect.type === 'crew_morale') {
+          // Direct morale modifier
+          this.gameState.modifyResource('morale', effect.value)
+          effectsApplied.push(`Crew morale: ${effect.value > 0 ? '+' : ''}${effect.value}`)
+        } else if (effect.type === 'crew_death') {
+          // Handle crew death
+          if (effect.crew) {
+            this.gameState.addFlag(`crew_${effect.crew}_dead`)
+            effectsApplied.push(`Crew member lost: ${effect.crew}`)
+          }
+          if (effect.count) {
+            this.gameState.modifyResource('population', -effect.count)
+            effectsApplied.push(`Population lost: -${effect.count}`)
+          }
+        } else if (effect.type === 'achievement') {
+          // Unlock achievement
+          if (effect.id) {
+            this.gameState.addFlag(`achievement_${effect.id}`)
+            effectsApplied.push(`Achievement unlocked: ${effect.id}`)
+          }
+        } else if (effect.type === 'faction_rep') {
+          // Modify faction reputation
+          if (effect.faction) {
+            const flagName = `faction_${effect.faction}_rep`
+            const currentRep = this.gameState.getFlag(flagName) || 0
+            this.gameState.setFlag(flagName, currentRep + effect.value)
+            effectsApplied.push(`${effect.faction} reputation: ${effect.value > 0 ? '+' : ''}${effect.value}`)
+          }
+        } else if (effect.type === 'combat') {
+          // Trigger combat encounter
+          specialEffects.push({
+            type: 'combat',
+            enemy: effect.enemy,
+            count: effect.count || 1
+          })
+          effectsApplied.push(`Combat initiated: ${effect.enemy}`)
+        } else if (effect.type === 'away_mission') {
+          // Trigger away mission
+          specialEffects.push({
+            type: 'away_mission',
+            mission: effect.mission
+          })
+          effectsApplied.push(`Away mission: ${effect.mission}`)
+        } else if (effect.type === 'faction_encounter') {
+          // Trigger faction encounter
+          specialEffects.push({
+            type: 'faction_encounter',
+            faction: effect.faction
+          })
+          effectsApplied.push(`Faction encounter: ${effect.faction}`)
+        } else if (effect.type === 'ship_control_lost') {
+          // Player loses ship control temporarily
+          this.gameState.addFlag('ship_control_lost')
+          if (effect.duration) {
+            this.gameState.setFlag('ship_control_lost_turns', effect.duration)
+          }
+          effectsApplied.push('Ship control compromised!')
         } else {
-          // Resource modification
+          // Resource modification (fallback for all standard resources)
           this.gameState.modifyResource(effect.type, effect.value)
           const sign = effect.value > 0 ? '+' : ''
           effectsApplied.push(`${effect.type}: ${sign}${effect.value}`)
@@ -225,6 +290,7 @@ export default class EventSystem {
       outcome: selectedOutcome,
       text: selectedOutcome.text,
       effectsApplied,
+      specialEffects, // Return special effects for scene to handle (combat, missions, etc.)
       gameOver
     }
   }

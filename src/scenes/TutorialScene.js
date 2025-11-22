@@ -200,7 +200,7 @@ export default class TutorialScene extends Phaser.Scene {
     this.stepDescription.setText(step.description)
     this.actionHint.setText(step.action)
 
-    // Create continue button
+    // Create continue button - ensure it's last so it's on top
     if (this.continueBtn) {
       this.continueBtn.destroy()
       this.continueLbl.destroy()
@@ -210,17 +210,19 @@ export default class TutorialScene extends Phaser.Scene {
     const btnColor = step.next === 'complete' ? COLORS.SUCCESS : COLORS.WARNING
 
     // Position button below the panel, not overlapping content
+    const btnY = this.cameras.main.height / 2 + 210
+
     this.continueBtn = this.add.rectangle(
       this.cameras.main.width / 2,
-      this.cameras.main.height / 2 + 210,
+      btnY,
       200, 50, btnColor
     ).setStrokeStyle(3, 0xFFFFFF)
+      .setDepth(1000) // Very high depth to ensure it's on top
       .setInteractive({ useHandCursor: true })
-      .setDepth(100)
 
     this.continueLbl = this.add.text(
       this.cameras.main.width / 2,
-      this.cameras.main.height / 2 + 210,
+      btnY,
       btnText,
       {
         fontSize: '20px',
@@ -228,18 +230,67 @@ export default class TutorialScene extends Phaser.Scene {
         color: '#FFFFFF',
         fontStyle: 'bold'
       }
-    ).setOrigin(0.5).setDepth(100)
+    ).setOrigin(0.5).setDepth(1001) // Even higher depth for text
+
+    // Make button pulse to show it's interactive
+    this.tweens.add({
+      targets: [this.continueBtn, this.continueLbl],
+      scaleX: 1.05,
+      scaleY: 1.05,
+      duration: 700,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    })
 
     this.continueBtn.on('pointerover', () => {
-      this.tweens.add({ targets: [this.continueBtn, this.continueLbl], scale: 1.1, duration: 100 })
+      this.continueBtn.setFillStyle(parseInt(COLORS.PRIMARY.replace('#', '0x')))
+      this.tweens.killTweensOf([this.continueBtn, this.continueLbl])
+      this.tweens.add({
+        targets: [this.continueBtn, this.continueLbl],
+        scaleX: 1.15,
+        scaleY: 1.15,
+        duration: 100
+      })
     })
 
     this.continueBtn.on('pointerout', () => {
-      this.tweens.add({ targets: [this.continueBtn, this.continueLbl], scale: 1, duration: 100 })
+      this.continueBtn.setFillStyle(btnColor)
+      this.tweens.add({
+        targets: [this.continueBtn, this.continueLbl],
+        scaleX: 1,
+        scaleY: 1,
+        duration: 100
+      })
+      // Restart pulse
+      this.tweens.add({
+        targets: [this.continueBtn, this.continueLbl],
+        scaleX: 1.05,
+        scaleY: 1.05,
+        duration: 700,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      })
     })
 
     this.continueBtn.on('pointerdown', () => {
-      this.nextStep()
+      // Stop all tweens
+      this.tweens.killTweensOf([this.continueBtn, this.continueLbl])
+
+      // Visual feedback
+      this.cameras.main.flash(100, 100, 200, 255)
+
+      // Scale down feedback
+      this.tweens.add({
+        targets: [this.continueBtn, this.continueLbl],
+        scaleX: 0.95,
+        scaleY: 0.95,
+        duration: 100,
+        onComplete: () => {
+          this.nextStep()
+        }
+      })
     })
 
     // Add visual examples based on step
